@@ -32,34 +32,7 @@
   /* Labels */
   .label{position:absolute;color:#fff;font-family:Arial,Helvetica,sans-serif;font-weight:1000;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,0.6);pointer-events:none;}
 
-  /* Mobile controls (visible) */
-  .ctrl{
-    position:fixed;bottom:10px;left:10px;right:10px;pointer-events:none;
-    display:flex;justify-content:space-between;align-items:flex-end;gap:12px;z-index:9999;
-  }
-  .touch-area{flex:1;height:calc(var(--btn-size));display:flex;gap:12px;pointer-events:auto;align-items:center;}
-  .btn{
-    width:calc(var(--btn-size));height:calc(var(--btn-size));border-radius:14px;
-    background:rgba(85,37,131,var(--ui-alpha));backdrop-filter:blur(6px);
-    display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;border:2px solid rgba(255,255,255,0.06);
-    box-shadow:0 6px 18px rgba(0,0,0,0.5);
-    -webkit-tap-highlight-color: transparent;
-    touch-action:none;
-  }
-  .btn.large{width:calc(var(--btn-size) + 8px);height:calc(var(--btn-size) + 8px);border-radius:50%;}
-  .invisible-zone{position:fixed;top:0;bottom:0;width:50%;pointer-events:auto;z-index:900;}
-  .left-zone{left:0;}
-  .right-zone{right:0;}
-.jump{
-  position: fixed;
-  left: 50%;
-  bottom: 14px;
-  transform: translateX(-50%);
-  z-index: 9998;
-}
-
-/* PC / geniş ekranlarda tüm mobil tuşları gizle */
-@media (min-width: 900px) {
+  /* Mobil kontrolleri gizle */
   .ctrl,
   .jump,
   .invisible-zone {
@@ -67,36 +40,25 @@
     opacity: 0 !important;
     pointer-events: none !important;
   }
-}
+
+
+
+
+
+
+
+
 
 </style>
 </head>
 <body>
+
+
   <div id="world">
     <div id="ground"></div>
     <!-- platformlar ve label'lar script ile eklenecek -->
     <div id="ball"></div>
   </div>
-
-  <!-- Görsel dokunmatik bölgeler: yarım ekranlar -->
-  <div class="invisible-zone left-zone" id="leftZone" aria-hidden="true"></div>
-  <div class="invisible-zone right-zone" id="rightZone" aria-hidden="true"></div>
-
-  <!-- Görsel butonlar (opsiyonel görsel destek) -->
-  <div class="ctrl">
-    <div class="touch-area">
-      <div class="btn" id="leftBtn">◀</div>
-    </div>
-    <div class="touch-area" style="justify-content:flex-end">
-      <div class="btn" id="rightBtn">▶</div>
-    </div>
-  </div>
-
-  <div class="jump">
-    <div class="btn large" id="jumpBtn">Zıpla</div>
-  </div>
-
-
 
 <script>
 /* ----------------- Ayarlar (burayı kolayca değiştir) ----------------- */
@@ -109,15 +71,13 @@ let moveSpeed = 0.5;               // tuşa/basılı tutmaya eklenen x ivme
 let maxSpeed = 6;                 // maksimum x hız
 let jumpForce = 20;                // zıplama kuvveti
 let bounce = 0.25;                 // zıplama geri tepmesi
+let gyroSensitivity = 0.1;         // gyroscope hassasiyeti
 /* -------------------------------------------------------------------- */
 
 const world = document.getElementById('world');
 const ball = document.getElementById('ball');
-const leftZone = document.getElementById('leftZone');
-const rightZone = document.getElementById('rightZone');
-const leftBtn = document.getElementById('leftBtn');
-const rightBtn = document.getElementById('rightBtn');
-const jumpBtn = document.getElementById('jumpBtn');
+
+const dismissWarning = document.getElementById('dismissWarning');
 
 let w = window.innerWidth, h = window.innerHeight;
 let worldWidth = w * WORLD_PAGES;
@@ -127,6 +87,12 @@ let scrollX = 0, maxScrollX = Math.max(0, worldWidth - w);
 let ballX=0, ballY=0, vx=0, vy=0;
 let isOnGround=false, onPlatform=null;
 let keys = {left:false,right:false,up:false};
+
+// Gyroscope değişkenleri
+let beta = 0; // Telefonun öne/arkaya eğimi (front-to-back)
+let gamma = 0; // Telefonun sola/sağa eğimi (left-to-right)
+let isGyroAvailable = false;
+let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 const platforms = [];
 const platformW = Math.round(Math.max(200, w * 0.2));
@@ -195,7 +161,71 @@ function init(){
   } else {
     ballX = 20; ballY = h/2;
   }
-  update(); requestAnimationFrame(loop);
+  
+  // Gyroscope'u başlat
+  initGyroscope();
+  
+
+  
+  update(); 
+  requestAnimationFrame(loop);
+}
+
+/* Gyroscope başlatma */
+function initGyroscope() {
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // iOS 13+ için izin iste
+    DeviceOrientationEvent.requestPermission()
+      .then(permissionState => {
+        if (permissionState === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation);
+          isGyroAvailable = true;
+        } else {
+          console.log('Gyroscope izni reddedildi');
+          isGyroAvailable = false;
+        }
+      })
+      .catch(console.error);
+  } else if ('DeviceOrientationEvent' in window) {
+    // Android ve diğer tarayıcılar
+    window.addEventListener('deviceorientation', handleOrientation);
+    isGyroAvailable = true;
+  } else {
+    console.log('Gyroscope desteklenmiyor');
+    isGyroAvailable = false;
+  }
+}
+
+/* Gyroscope verilerini işle */
+function handleOrientation(event) {
+  beta = event.beta;  // Öne/arkaya eğim (-180 to 180)
+  gamma = event.gamma; // Sola/sağa eğim (-90 to 90)
+  
+  // Gamma değerini normalize et (-90 to 90 arası)
+  // Telefon düz dururken gamma = 0
+  // Sağa eğince pozitif, sola eğince negatif
+  if (gamma !== null) {
+    // Hassasiyeti ayarla
+    let tilt = gamma * gyroSensitivity;
+    
+    // Eşik değerleri (küçük eğimleri yok say)
+    const threshold = 2;
+    if (Math.abs(tilt) > threshold) {
+      if (tilt > 0) {
+        // Sağa eğilmiş - sağa git
+        keys.right = true;
+        keys.left = false;
+      } else {
+        // Sola eğilmiş - sola git
+        keys.left = true;
+        keys.right = false;
+      }
+    } else {
+      // Düz duruyor - hareket etme
+      keys.left = false;
+      keys.right = false;
+    }
+  }
 }
 
 /* camera keeps ball centered horizontally */
@@ -253,7 +283,7 @@ function loop(){
   vy += gravity;
   vx *= friction;
 
-  // apply control
+  // apply control - artık gyroscope veya klavye kontrolü
   if(keys.left) vx -= moveSpeed;
   if(keys.right) vx += moveSpeed;
 
@@ -290,69 +320,44 @@ function loop(){
   requestAnimationFrame(loop);
 }
 
-/* Input handlers: pointer/touch & keyboard */
-/* Helper to set key and reflect visual state */
-function setKey(k,v){
-  keys[k]=v;
-  // visual pressed state (simple)
-  if(k==='left') leftBtn.style.background = v ? "linear-gradient(180deg, rgba(253,185,39,0.9), rgba(85,37,131,0.9))" : "";
-  if(k==='right') rightBtn.style.background = v ? "linear-gradient(180deg, rgba(253,185,39,0.9), rgba(85,37,131,0.9))" : "";
-}
-
-/* pointer events for visible buttons */
-leftBtn.addEventListener('pointerdown', e => { e.preventDefault(); setKey('left',true); });
-leftBtn.addEventListener('pointerup', e => { e.preventDefault(); setKey('left',false); });
-leftBtn.addEventListener('pointercancel', ()=>setKey('left',false));
-leftBtn.addEventListener('pointerleave', ()=>setKey('left',false));
-
-rightBtn.addEventListener('pointerdown', e => { e.preventDefault(); setKey('right',true); });
-rightBtn.addEventListener('pointerup', e => { e.preventDefault(); setKey('right',false); });
-rightBtn.addEventListener('pointercancel', ()=>setKey('right',false));
-rightBtn.addEventListener('pointerleave', ()=>setKey('right',false));
-
-/* invisible half-screen zones for convenience (hold to move) */
-leftZone.addEventListener('pointerdown', e => { e.preventDefault(); setKey('left',true); });
-leftZone.addEventListener('pointerup', e => { e.preventDefault(); setKey('left',false); });
-leftZone.addEventListener('pointercancel', ()=>setKey('left',false));
-leftZone.addEventListener('pointerleave', ()=>setKey('left',false));
-
-rightZone.addEventListener('pointerdown', e => { e.preventDefault(); setKey('right',true); });
-rightZone.addEventListener('pointerup', e => { e.preventDefault(); setKey('right',false); });
-rightZone.addEventListener('pointercancel', ()=>setKey('right',false));
-rightZone.addEventListener('pointerleave', ()=>setKey('right',false));
-
-/* jump button */
-jumpBtn.addEventListener('pointerdown', e => {
+/* Ekrana dokununca zıplama */
+document.addEventListener('touchstart', function(e) {
   e.preventDefault();
-  if(isOnGround || onPlatform){ vy = -jumpForce; isOnGround=false; onPlatform=null; }
+  if(isOnGround || onPlatform){ 
+    vy = -jumpForce; 
+    isOnGround=false; 
+    onPlatform=null; 
+  }
+}, {passive: false});
+
+/* Fare tıklaması ile de zıplama (PC için) */
+document.addEventListener('mousedown', function(e) {
+  if(isOnGround || onPlatform){ 
+    vy = -jumpForce; 
+    isOnGround=false; 
+    onPlatform=null; 
+  }
 });
 
-/* simple swipe detection to jump (optional): upward flick */
-let touchStartY = null, touchStartX = null;
-document.addEventListener('touchstart', e => {
-  const t = e.touches[0];
-  touchStartY = t.clientY; touchStartX = t.clientX;
-}, {passive:true});
-document.addEventListener('touchend', e => {
-  if(touchStartY===null) return;
-  const t = e.changedTouches[0];
-  const dy = touchStartY - t.clientY;
-  const dx = t.clientX - touchStartX;
-  // upward flick -> jump
-  if(dy > 60 && Math.abs(dx) < 120 && (isOnGround || onPlatform)) { vy = -jumpForce; isOnGround=false; onPlatform=null; }
-  touchStartY = null; touchStartX = null;
-}, {passive:true});
-
-/* keyboard */
+/* Klavye kontrolleri (PC için yedek) */
 window.addEventListener('keydown', e => {
-  if(e.key === 'ArrowLeft') setKey('left',true);
-  if(e.key === 'ArrowRight') setKey('right',true);
-  if(e.key === 'ArrowUp' || e.code === 'Space'){ e.preventDefault(); if(isOnGround || onPlatform){ vy = -jumpForce; isOnGround=false; onPlatform=null; } }
+  if(e.key === 'ArrowLeft') keys.left = true;
+  if(e.key === 'ArrowRight') keys.right = true;
+  if(e.key === 'ArrowUp' || e.code === 'Space'){ 
+    e.preventDefault(); 
+    if(isOnGround || onPlatform){ 
+      vy = -jumpForce; 
+      isOnGround=false; 
+      onPlatform=null; 
+    } 
+  }
 });
+
 window.addEventListener('keyup', e => {
-  if(e.key === 'ArrowLeft') setKey('left',false);
-  if(e.key === 'ArrowRight') setKey('right',false);
+  if(e.key === 'ArrowLeft') keys.left = false;
+  if(e.key === 'ArrowRight') keys.right = false;
 });
+
 
 /* handle resize */
 window.addEventListener('resize', ()=>{ buildWorld(); init(); });
