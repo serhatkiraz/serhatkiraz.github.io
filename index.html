@@ -1,531 +1,128 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Serhat Kiraz</title>
-<style>
-  :root{
-    --bg:#0b0b0d;
-    --accent:#552583; /* mor */
-    --accent2:#FDB927; /* altın */
-    --ui-alpha:0.14;
-    --ui-size:18vmin;
-    --btn-size:18vmin;
-  }
-
-  html,body{height:100%;margin:0;padding:0;overflow:hidden;background:var(--bg);touch-action:none;-webkit-user-select:none;user-select:none;}
-  /* world container: geniş dünya burada, kamera topun merkezini takip eder */
-  #world{position:absolute;left:50%;top:50%;transform-origin:0 0;will-change:transform;}
-
-  /* ground & platforms */
-  #ground{position:absolute;left:0;bottom:0;height:12px;background:#222;width:100%;}
-  .platform{position:absolute;background:var(--accent2);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
-
-  /* ball - DAİMA EKRAN MERKEZİNDE */
-  #ball{
-    position: fixed !important;
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    border-radius:50%;
-    width:64px;height:64px;
-    background:radial-gradient(circle at 30% 30%, #7a43b0, var(--accent));
-    box-shadow:inset -8px -8px 16px rgba(0,0,0,0.4),0 0 30px rgba(85,37,131,0.25);
-    z-index: 1000;
-  }
-
-  /* Labels */
-  .label{position:absolute;color:#fff;font-family:Arial,Helvetica,sans-serif;font-weight:1000;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,0.6);pointer-events:none;}
-
-  /* Mobil kontrolleri gizle */
-  .ctrl,
-  .jump,
-  .invisible-zone {
-    display: none !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-
-  /* Gyroscope destek uyarısı */
-  #gyroWarning {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.8);
-    color: white;
-    padding: 15px 25px;
-    border-radius: 10px;
-    text-align: center;
-    font-family: Arial, sans-serif;
-    z-index: 10000;
-    display: none;
-    max-width: 90%;
-    border: 2px solid var(--accent2);
-  }
-
-  #gyroWarning.show {
-    display: block;
-  }
-
-  #gyroWarning button {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 5px;
-    margin-top: 10px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  #gyroWarning button:hover {
-    background: var(--accent2);
-  }
-
-  /* Gyroscope simülasyonu için PC kontrolleri */
-  #pcControls {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background: rgba(0,0,0,0.7);
-    padding: 15px;
-    border-radius: 10px;
-    z-index: 9999;
-    display: none;
-  }
-
-  #pcControls.show {
-    display: block;
-  }
-
-  #pcControls button {
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin: 5px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  /* Hız göstergesi */
-  #speedIndicator {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    z-index: 9999;
-    border-left: 4px solid var(--accent2);
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Serhat Kiraz — Projeler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #24292f;
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 { margin: 0; }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .project {
+      background: white;
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .project h3 {
+      margin: 0 0 0.6rem 0;
+    }
+    .project a {
+      text-decoration: none;
+      color: #0366d6;
+      font-weight: bold;
+    }
+    .project p {
+      margin: 0.4rem 0 0;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      background: #24292f;
+      color: white;
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
-  <div id="gyroWarning">
-    <p>Bu oyun telefonunuzun eğilmesiyle kontrol ediliyor.</p>
-    <p>Telefonu sola eğin: Dünya sağa kayar</p>
-    <p>Telefonu sağa eğin: Dünya sola kayar</p>
-    <p>Ekrana dokunun: Top zıplar</p>
-    <button id="dismissWarning">Tamam</button>
+
+  <header>
+    <h1>Merhaba! 👋 Ben Serhat Kiraz</h1>
+    <p>Github üzerindeki projelerimin kısa bir özeti</p>
+  </header>
+
+  <div class="container">
+
+    <div class="project">
+      <h3>
+        <a href="https://serhatkiraz.github.io/karicim/" target="_blank">karicim</a>
+      </h3>
+      <p>HTML ile geliştirilmiş blok yerleştirme puzzle oyunu.</p>
+    </div>
+
+
+    <div class="project">
+      <h3>
+        <a href="https://serhatkiraz.github.io/bolunebility/" target="_blank">bolunebility</a>
+      </h3>
+      <p>JavaScript ile yazılmış bir sayı aralığı analiz aracı.</p>
+    </div>
+
+    <div class="project">
+      <h3>
+        <a href="https://serhatkiraz.github.io/biara/" target="_blank">biara</a>
+      </h3>
+      <p>Görev ve alışveriş listesi yöneticisi (JS uygulaması).</p>
+    </div>
+
+    <div class="project">
+      <h3>
+        <a href="https://serhatkiraz.github.io/hesapsiz/" target="_blank">hesapsiz</a>
+      </h3>
+      <p>Çok çok büyük sayılar için sınırsız hesap makinesi.</p>
+    </div>
+
+    <div class="project">
+      <h3>
+        <a href="https://serhatkiraz.github.io/mesafe/" target="_blank">mesafe</a>
+      </h3>
+      <p>Şehirler arası mesafeye göre sıralama aracı (JS).</p>
+    </div>
+
+    <div class="project">
+      <h3>
+        <a href="https://serhatkiraz.github.io/LUCA/" target="_blank">LUCA</a>
+      </h3>
+      <p>HTML tabanlı biyolojik hayatta kalma oyun.</p>
+    </div>
+
+    <div class="project">
+      <h3>
+        <a href="https://serhatkiraz.github.io/balonpatlatma/" target="_blank">balonpatlatma</a>
+      </h3>
+      <p>Balon patlatma oyunu (HTML ile).</p>
+    </div>
+
+    <div class="project">
+      <h3>
+        <a href="https://serhatkiraz.github.io/tophavuzu/" target="_blank">tophavuzu</a>
+      </h3>
+      <p>Fizik tabanlı interaktif top havuzu simülatörü.</p>
+    </div>
+
   </div>
 
-  <div id="pcControls">
-    <p>PC'de oynuyorsunuz. Aşağıdaki tuşları kullanın:</p>
-    <p>← → : Dünyayı hareket ettir</p>
-    <p>Space veya ↑ : Zıpla</p>
-    <p>veya telefonunuzda açın</p>
-  </div>
+  <footer>
+    © 2025 • <a href="https://github.com/serhatkiraz" target="_blank" style="color:#58a6ff;">Serhat Kiraz</a>
+  </footer>
 
-  <div id="speedIndicator">
-    Hız: <span id="speedValue">0</span><br>
-    Gamma: <span id="gammaValue">0</span>
-  </div>
-
-  <div id="world">
-    <div id="ground"></div>
-    <!-- platformlar ve label'lar script ile eklenecek -->
-  </div>
-
-  <!-- TOP ARTIK FIXED POSITION'DA -->
-  <div id="ball"></div>
-
-<script>
-/* ----------------- Ayarlar (burayı kolayca değiştir) ----------------- */
-let WORLD_PAGES = 10;              // kaç ekran genişliği uzunluğunda dünya
-let ballSize = 49;                 // başlangıç boyutu (px)
-let gravity = 0.6;                 // yerçekimi
-let friction = 0.93;              // hava sürtünmesi (1'e yakın)
-let groundFriction = 0.93;         // yerdeki x sürtünmesi (0-1)
-let moveSpeed = 0.5;               // ivme
-let maxSpeed = 6;                 // maksimum x hız
-let jumpForce = 20;                // zıplama kuvveti
-let bounce = 0.25;                 // zıplama geri tepmesi
-let gyroSensitivity = 0.15;        // gyroscope hassasiyeti (artırıldı)
-let cameraFollowSpeed = 0.1;       // kameranın takip hızı
-/* -------------------------------------------------------------------- */
-
-const world = document.getElementById('world');
-const ball = document.getElementById('ball');
-const gyroWarning = document.getElementById('gyroWarning');
-const pcControls = document.getElementById('pcControls');
-const dismissWarning = document.getElementById('dismissWarning');
-const speedValue = document.getElementById('speedValue');
-const gammaValue = document.getElementById('gammaValue');
-
-let w = window.innerWidth, h = window.innerHeight;
-let worldWidth = w * WORLD_PAGES;
-let worldHeight = h * 1.5; // DÜNYA YÜKSEKLİĞİNİ ARTIRDIK
-
-// DÜNYA KONUMU (top daima ekran ortasında, dünya hareket eder)
-let worldX = 0; // Dünyanın X pozisyonu
-let worldY = 0; // Dünyanın Y pozisyonu
-let targetWorldX = 0;
-let targetWorldY = 0;
-
-// TOPUN DÜNYA İÇİNDEKİ GERÇEK POZİSYONU
-let ballWorldX = 0; // Topun dünya koordinatlarındaki X'i
-let ballWorldY = 0; // Topun dünya koordinatlarındaki Y'si
-let vx = 0, vy = 0; // Hız vektörleri
-
-let isOnGround = false, onPlatform = null;
-let keys = {left:false,right:false,up:false};
-
-// Gyroscope değişkenleri
-let beta = 0; // Telefonun öne/arkaya eğimi (front-to-back)
-let gamma = 0; // Telefonun sola/sağa eğimi (left-to-right)
-let isGyroAvailable = false;
-let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-const platforms = [];
-const platformW = Math.round(Math.max(200, w * 0.2));
-const platformH = 18;
-
-/* Prevent default scroll on touch move to avoid page bouncing */
-document.addEventListener('touchmove', e => { e.preventDefault(); }, {passive:false});
-
-/* Build world size and platforms */
-function buildWorld(){
-  w = window.innerWidth; h = window.innerHeight;
-  worldWidth = Math.max(w * 2, w * WORLD_PAGES);
-  worldHeight = h * 1.5; // Dünya yüksekliği pencereden daha yüksek
-  world.style.width = worldWidth + 'px';
-  world.style.height = worldHeight + 'px';
-  
-  // Dünyayı merkeze yerleştir
-  world.style.left = '50%';
-  world.style.top = '50%';
-
-  // remove existing platforms
-  platforms.forEach(p => { if(p.el) p.el.remove(); if(p.label) p.label.remove(); });
-  platforms.length = 0;
-
-  // positions (relative to worldWidth)
-  const pos = [
-    {x: worldWidth * 0.03, y: worldHeight * 0.78, text:'Hi!'},
-    {x: worldWidth * 0.12, y: worldHeight * 0.55, text:"I am Serhat"},
-    {x: worldWidth * 0.32, y: worldHeight * 0.75, text:'I am passionate about exploring new ideas'},
-    {x: worldWidth * 0.52, y: worldHeight * 0.68, text:'I enjoy coding solid and unique apps'},
-    {x: worldWidth * 0.72, y: worldHeight * 0.58, text:'This are my finished projects'},
-    {x: worldWidth * 0.90, y: worldHeight * 0.48, text:'Feel free to contact me'}
-  ];
-
-  pos.forEach((p,i) => {
-    const el = document.createElement('div');
-    el.className='platform';
-    el.style.width = platformW+'px';
-    el.style.height = platformH+'px';
-    el.style.left = p.x + 'px';
-    el.style.top = p.y + 'px';
-    world.appendChild(el);
-
-    const label = document.createElement('div');
-    label.className='label';
-    label.style.left = p.x + 'px';
-    label.style.top = (p.y - 70) + 'px';
-    label.style.width = platformW + 'px';
-    label.textContent = p.text;
-    world.appendChild(label);
-
-    platforms.push({x:p.x,y:p.y,width:platformW,height:platformH,el,label});
-  });
-
-  // ground width covers world
-  const grd = document.getElementById('ground');
-  grd.style.width = worldWidth + 'px';
-  grd.style.left = '0px';
-  grd.style.top = (worldHeight - 12) + 'px'; // Dünyanın altında
-}
-
-/* initialize ball on first platform */
-function init(){
-  buildWorld();
-  ball.style.width = ball.style.height = ballSize + 'px';
-  
-  // place ball on first platform (dünya koordinatlarında)
-  if(platforms[0]){
-    ballWorldX = platforms[0].x + (platforms[0].width/2) - ballSize/2;
-    ballWorldY = platforms[0].y - ballSize - 6;
-  } else {
-    ballWorldX = worldWidth/2; 
-    ballWorldY = worldHeight/2;
-  }
-  
-  // Kamerayı topun başlangıç pozisyonuna odakla
-  worldX = -ballWorldX + w/2 - ballSize/2;
-  worldY = -ballWorldY + h/2 - ballSize/2;
-  updateWorldPosition();
-  
-  // Gyroscope'u başlat
-  initGyroscope();
-  
-  // Cihaz tipine göre uyarı göster
-  if (isMobile && !isGyroAvailable) {
-    setTimeout(() => {
-      gyroWarning.classList.add('show');
-    }, 1000);
-  } else if (!isMobile) {
-    pcControls.classList.add('show');
-  }
-  
-  requestAnimationFrame(loop);
-}
-
-/* Gyroscope başlatma */
-function initGyroscope() {
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS 13+ için izin iste
-    DeviceOrientationEvent.requestPermission()
-      .then(permissionState => {
-        if (permissionState === 'granted') {
-          window.addEventListener('deviceorientation', handleOrientation);
-          isGyroAvailable = true;
-        } else {
-          console.log('Gyroscope izni reddedildi');
-          isGyroAvailable = false;
-        }
-      })
-      .catch(console.error);
-  } else if ('DeviceOrientationEvent' in window) {
-    // Android ve diğer tarayıcılar
-    window.addEventListener('deviceorientation', handleOrientation);
-    isGyroAvailable = true;
-  } else {
-    console.log('Gyroscope desteklenmiyor');
-    isGyroAvailable = false;
-  }
-}
-
-/* Gyroscope verilerini işle */
-function handleOrientation(event) {
-  beta = event.beta;  // Öne/arkaya eğim (-180 to 180)
-  gamma = event.gamma; // Sola/sağa eğim (-90 to 90)
-  
-  // Gamma değerini güncelle (hız göstergesi için)
-  gammaValue.textContent = gamma ? gamma.toFixed(1) : "0";
-  
-  // Gamma değerini normalize et (-90 to 90 arası)
-  // Telefon düz dururken gamma = 0
-  // Sağa eğince pozitif, sola eğince negatif
-  if (gamma !== null) {
-    // Hassasiyeti ayarla - daha responsive hale getir
-    let tilt = gamma * gyroSensitivity;
-    
-    // Eşik değerleri (küçük eğimleri yok say)
-    const threshold = 1;
-    if (Math.abs(tilt) > threshold) {
-      if (tilt > 0) {
-        // Sağa eğilmiş - top sola git (dünya sağa kay)
-        keys.right = true;
-        keys.left = false;
-      } else {
-        // Sola eğilmiş - top sağa git (dünya sola kay)
-        keys.left = true;
-        keys.right = false;
-      }
-    } else {
-      // Düz duruyor - hareket etme
-      keys.left = false;
-      keys.right = false;
-    }
-  }
-}
-
-/* Dünya pozisyonunu güncelle */
-function updateWorldPosition() {
-  world.style.transform = `translate(${worldX}px, ${worldY}px)`;
-}
-
-/* collisions with platforms */
-function checkPlatformCollision(p){
-  const platTop = p.y, platBottom = p.y + p.height;
-  const platLeft = p.x, platRight = p.x + p.width;
-  const ballTop = ballWorldY, ballBottom = ballWorldY + ballSize;
-  const ballLeft = ballWorldX, ballRight = ballWorldX + ballSize;
-
-  // landing on top
-  if(ballRight > platLeft && ballLeft < platRight && ballBottom > platTop && ballTop < platTop && vy > 0){
-    ballWorldY = platTop - ballSize;
-    vy = -vy * bounce;
-    onPlatform = p;
-    isOnGround = false;
-    return true;
-  }
-  // hit head under platform
-  if(ballRight > platLeft && ballLeft < platRight && ballTop < platBottom && ballBottom > platBottom && vy < 0){
-    ballWorldY = platBottom;
-    vy = -vy * bounce;
-    return true;
-  }
-  // horizontal collisions (simple)
-  if(ballBottom > platTop && ballTop < platBottom){
-    if(ballRight > platLeft && ballLeft < platLeft && vx > 0){
-      ballWorldX = platLeft - ballSize; vx = -vx * bounce; return true;
-    }
-    if(ballLeft < platRight && ballRight > platRight && vx < 0){
-      ballWorldX = platRight; vx = -vx * bounce; return true;
-    }
-  }
-
-  if(onPlatform === p && !(ballBottom === platTop)) onPlatform = null;
-  return false;
-}
-
-/* main loop */
-function loop(){
-  // apply gravity & friction
-  vy += gravity;
-  vx *= friction;
-
-  // apply control - artık gyroscope veya klavye kontrolü
-  if(keys.left) vx -= moveSpeed;
-  if(keys.right) vx += moveSpeed;
-
-  // clamp speed
-  vx = Math.max(-maxSpeed, Math.min(maxSpeed, vx));
-
-  // Hız göstergesini güncelle
-  speedValue.textContent = Math.abs(vx).toFixed(1);
-
-  // integrate - TOPUN DÜNYA İÇİNDEKİ POZİSYONUNU GÜNCELLE
-  ballWorldX += vx;
-  ballWorldY += vy;
-
-  // platform collisions
-  let hit = false;
-  for(const p of platforms) { 
-    if(checkPlatformCollision(p)){ 
-      hit = true; 
-      break; 
-    } 
-  }
-
-  if(!hit){
-    // ZEMİN ÇARPIŞMASI - DÜNYA YÜKSEKLİĞİNİ KULLAN
-const groundY = worldHeight - 77 - ballSize;
-    if(ballWorldY > groundY){
-      ballWorldY = groundY;
-      vy = -vy * bounce;
-      isOnGround = true; 
-      onPlatform = null;
-      if(Math.abs(vy) < 0.5) vy = 0;
-    } else {
-      isOnGround = false;
-    }
-  }
-
-  // simple world bounds
-  if(ballWorldX < 0){ 
-    ballWorldX = 0; 
-    vx = -vx * bounce; 
-  }
-  if(ballWorldX > worldWidth - ballSize){ 
-    ballWorldX = worldWidth - ballSize; 
-    vx = -vx * bounce; 
-  }
-  if(ballWorldY < 0){ 
-    ballWorldY = 0; 
-    vy = -vy * bounce; 
-  }
-
-  // KAMERA TAKİBİ - Top daima ekran ortasında kalsın
-  // Dünyayı, top ekranın ortasında kalacak şekilde kaydır
-  targetWorldX = -ballWorldX + w/2 - ballSize/2;
-  targetWorldY = -ballWorldY + h/2 - ballSize/2;
-  
-  // Yumuşak kamera takibi (lerp)
-  worldX += (targetWorldX - worldX) * cameraFollowSpeed;
-  worldY += (targetWorldY - worldY) * cameraFollowSpeed;
-  
-  updateWorldPosition();
-  requestAnimationFrame(loop);
-}
-
-/* Ekrana dokununca zıplama */
-document.addEventListener('touchstart', function(e) {
-  e.preventDefault();
-  if(isOnGround || onPlatform){ 
-    vy = -jumpForce; 
-    isOnGround=false; 
-    onPlatform=null; 
-  }
-}, {passive: false});
-
-/* Fare tıklaması ile de zıplama (PC için) */
-document.addEventListener('mousedown', function(e) {
-  if(isOnGround || onPlatform){ 
-    vy = -jumpForce; 
-    isOnGround=false; 
-    onPlatform=null; 
-  }
-});
-
-/* Klavye kontrolleri (PC için yedek) */
-window.addEventListener('keydown', e => {
-  if(e.key === 'ArrowLeft') keys.left = true;
-  if(e.key === 'ArrowRight') keys.right = true;
-  if(e.key === 'ArrowUp' || e.code === 'Space'){ 
-    e.preventDefault(); 
-    if(isOnGround || onPlatform){ 
-      vy = -jumpForce; 
-      isOnGround=false; 
-      onPlatform=null; 
-    } 
-  }
-});
-
-window.addEventListener('keyup', e => {
-  if(e.key === 'ArrowLeft') keys.left = false;
-  if(e.key === 'ArrowRight') keys.right = false;
-});
-
-/* Uyarıyı kapat */
-dismissWarning.addEventListener('click', function() {
-  gyroWarning.classList.remove('show');
-});
-
-/* handle resize */
-window.addEventListener('resize', ()=>{ 
-  w = window.innerWidth; 
-  h = window.innerHeight;
-  buildWorld(); 
-  
-  // Yeniden boyutlandırma sonrası kamera pozisyonunu güncelle
-  targetWorldX = -ballWorldX + w/2 - ballSize/2;
-  targetWorldY = -ballWorldY + h/2 - ballSize/2;
-});
-
-/* start */
-init();
-</script>
 </body>
 </html>
