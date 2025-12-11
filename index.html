@@ -1,619 +1,372 @@
-s<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Serhat Kiraz - Home Page</title>
-<!-- Font Awesome Icons -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serhat Kiraz — Portfolio</title>
+
+<!-- Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 
 <style>
-/* ===============================
-   VARIABLES
-   =============================== */
+/* ----------------------------------------------------
+   COLOR VARIABLES
+---------------------------------------------------- */
 :root {
-  --primary:#552583; /* main color */
-  --secondary:#FDB927; /* accent color */
-  --light:#808080; /* light gray background */
-  --dark:#000; /* dark text */
-  --border-radius:12px;
-  --box-shadow:0 8px 30px rgba(0,0,0,0.12);
-  --transition:all .3s ease;
+  --primary:#552583;
+  --secondary:#FDB927;
+  --dark:#000;
+  --light:#808080;
+  --card:#111;
+  --border:#222;
 }
 
-/* ===============================
-GLOBAL STYLES
-=============================== */
+/* ----------------------------------------------------
+   GLOBAL
+---------------------------------------------------- */
 * {
-  margin:0; 
-  padding:0; 
-  box-sizing:border-box; 
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
   font-family:'Inter', sans-serif;
 }
 
 body {
-  background:#000; 
-  color:var(--dark); 
-  min-height:100vh; 
-  display:flex; 
-  justify-content:center; 
-  align-items:center; 
-  padding:20px;
+  background:#000;
+  color:white;
+  line-height:1.6;
 }
 
-.container {
-  background:var(--light); 
-  border-radius:var(--border-radius); 
-  box-shadow:var(--box-shadow); 
-  width:100%; 
-  max-width:900px; 
-  overflow:hidden; 
-  transition:var(--transition);
+a {
+  text-decoration:none;
+  color:inherit;
 }
 
-/* ===============================
-HEADER
-=============================== */
+/* ----------------------------------------------------
+   HEADER
+---------------------------------------------------- */
 .header {
-  background: linear-gradient(90deg,var(--primary),var(--secondary));
-  color:var(--dark);
-  padding:25px 30px;
-  position:relative;
-  text-align: center;
+  padding:70px 20px;
+  text-align:center;
+  background: radial-gradient(circle at top, #552583, #000 65%);
 }
 
 .header h1 {
-  font-size:2rem;
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:15px;
+  font-size:3rem;
+  font-weight:900;
+  letter-spacing:1px;
 }
 
-.header h1 i {
-  font-size:1.8rem;
+.header p {
+  margin-top:12px;
+  font-size:1.2rem;
+  opacity:0.9;
 }
 
-.subtitle {
-  font-size:1rem;
-  opacity:.9;
-  margin-top:8px;
-  font-weight:500;
+/* ----------------------------------------------------
+   MAIN CONTAINER
+---------------------------------------------------- */
+.container {
+  width:100%;
+  max-width:1150px;
+  margin:50px auto;
+  padding:20px;
 }
 
-/* ===============================
-BUTTONS
-=============================== */
-.btn {
-  padding:14px 24px; 
-  border:none; 
-  border-radius:8px; 
-  font-weight:600; 
-  font-size:.95rem; 
-  cursor:pointer; 
-  transition:var(--transition); 
-  display:flex; 
-  align-items:center; 
-  justify-content:center; 
-  gap:8px; 
-  white-space:nowrap;
-  text-decoration: none;
-}
-
-.btn-primary {
-  background:var(--primary); 
-  color:white;
-}
-
-.btn-primary:hover {
-  background:var(--secondary); 
-  color:var(--dark);
-  transform:translateY(-2px);
-  box-shadow:0 5px 15px rgba(253, 185, 39, 0.3);
-}
-
-.btn-secondary {
-  background:var(--secondary); 
-  color:var(--dark);
-}
-
-.btn-secondary:hover {
-  background:#e6a91e; 
-  transform:translateY(-2px);
-  box-shadow:0 5px 15px rgba(253, 185, 39, 0.3);
-}
-
-.btn-group {
-  display:flex; 
-  gap:12px; 
-  flex-wrap:wrap; 
-  justify-content:center;
-}
-
-/* ===============================
-CONTENT SECTIONS
-=============================== */
-.content {
-  padding:30px; 
-  display:flex; 
-  flex-direction:column; 
-  gap:25px; 
-  background:var(--light); 
-  color:var(--dark);
-}
-
-.section {
-  background:var(--light); 
-  border-radius:var(--border-radius); 
-  padding:22px; 
-  border:1px solid rgba(255, 255, 255, 0.1);
-}
-
+/* ----------------------------------------------------
+   SECTION TITLES
+---------------------------------------------------- */
 .section-title {
-  font-size:1.3rem; 
-  font-weight:600; 
-  margin-bottom:20px;
-  color:var(--primary); 
-  display:flex; 
-  align-items:center; 
-  gap:12px;
-  padding-bottom:10px;
-  border-bottom:2px solid rgba(85, 37, 131, 0.2);
-}
-
-.section-title i {
+  font-size:1.8rem;
+  margin-bottom:25px;
+  font-weight:700;
   color:var(--secondary);
+  letter-spacing:1px;
+  position:relative;
 }
 
-/* ===============================
-BIO SECTION
-=============================== */
-.bio-content {
-  line-height:1.6;
-  font-size:1.05rem;
+.section-title:after {
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-8px;
+  width:60px;
+  height:3px;
+  background:var(--primary);
 }
 
-.bio-content p {
-  margin-bottom:15px;
-}
-
-.highlight {
-  color:var(--primary);
-  font-weight:600;
+/* ----------------------------------------------------
+   ABOUT CARD
+---------------------------------------------------- */
+.about-card {
+  background:var(--card);
+  padding:30px;
+  border-radius:15px;
+  border:1px solid var(--border);
+  box-shadow:0 0 40px rgba(85,37,131,0.25);
 }
 
 .social-links {
+  margin-top:20px;
   display:flex;
   gap:15px;
-  margin-top:20px;
-  flex-wrap:wrap;
 }
 
-.social-link {
-  display:flex;
-  align-items:center;
-  gap:8px;
+.social-links a {
+  background:var(--primary);
   padding:10px 18px;
-  background:rgba(255, 255, 255, 0.1);
   border-radius:8px;
-  color:var(--dark);
-  text-decoration:none;
-  transition:var(--transition);
-  font-weight:500;
+  font-weight:600;
+  transition:0.3s;
 }
 
-.social-link:hover {
-  background:rgba(255, 255, 255, 0.2);
-  transform:translateY(-2px);
+.social-links a:hover {
+  background:var(--secondary);
+  color:#000;
 }
 
-/* ===============================
-PROJECTS SECTION
-=============================== */
-.projects-grid {
+/* ----------------------------------------------------
+   PROJECT GRID
+---------------------------------------------------- */
+.projects {
+  margin-top:50px;
+}
+
+.project-grid {
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
-  gap:20px;
-  margin-top:20px;
+  gap:25px;
 }
 
 .project-card {
-  background:rgba(255, 255, 255, 0.95);
-  border-radius:var(--border-radius);
+  background:#111;
+  border:1px solid #222;
+  border-radius:15px;
   padding:25px;
-  border-left:5px solid var(--primary);
-  transition:var(--transition);
-  box-shadow:0 5px 15px rgba(0,0,0,0.05);
-  height:100%;
+  transition:0.3s;
   display:flex;
   flex-direction:column;
 }
 
 .project-card:hover {
-  transform:translateY(-5px);
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  border-left-color:var(--secondary);
+  transform:translateY(-6px);
+  box-shadow:0 0 20px rgba(253,185,39,0.25);
 }
 
-.project-icon {
+.project-card i {
   font-size:2.2rem;
-  color:var(--primary);
-  margin-bottom:15px;
+  color:var(--secondary);
 }
 
-.project-title {
+.project-card h3 {
+  margin:15px 0 10px;
   font-size:1.3rem;
-  font-weight:700;
-  color:var(--dark);
-  margin-bottom:10px;
 }
 
-.project-description {
-  color:rgba(0, 0, 0, 0.7);
-  line-height:1.5;
-  margin-bottom:20px;
-  flex-grow:1;
-}
-
-.project-tech {
+.tech-list {
+  margin:10px 0 15px;
   display:flex;
-  gap:8px;
   flex-wrap:wrap;
-  margin-bottom:20px;
+  gap:8px;
 }
 
-.tech-tag {
-  background:rgba(85, 37, 131, 0.1);
-  color:var(--primary);
-  padding:5px 12px;
+.tech {
+  background:rgba(253,185,39,0.15);
+  padding:6px 12px;
   border-radius:20px;
   font-size:0.85rem;
-  font-weight:500;
+  font-weight:600;
+  color:var(--secondary);
 }
 
-.project-link {
-  align-self:flex-start;
+.project-card .open-btn {
   margin-top:auto;
-}
-
-/* ===============================
-SKILLS SECTION
-=============================== */
-.skills-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
-  gap:15px;
-  margin-top:20px;
-}
-
-.skill-item {
-  background:rgba(255, 255, 255, 0.9);
+  background:var(--primary);
+  padding:10px 14px;
+  font-weight:600;
   border-radius:8px;
+  transition:0.3s;
+}
+
+.project-card .open-btn:hover {
+  background:var(--secondary);
+  color:#000;
+}
+
+/* ----------------------------------------------------
+   SKILLS
+---------------------------------------------------- */
+.skills-grid {
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+  gap:15px;
+}
+
+.skill {
+  background:#111;
   padding:15px;
+  border-radius:10px;
+  border:1px solid #222;
   display:flex;
   align-items:center;
   gap:12px;
-  transition:var(--transition);
+  transition:0.3s;
 }
 
-.skill-item:hover {
-  background:white;
-  transform:translateY(-2px);
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+.skill:hover {
+  transform:translateY(-4px);
+  box-shadow:0 0 15px rgba(85,37,131,0.3);
 }
 
-.skill-icon {
+.skill i {
   font-size:1.5rem;
-  color:var(--primary);
+  color:var(--secondary);
 }
 
-.skill-name {
-  font-weight:600;
-  color:var(--dark);
-}
-
-/* ===============================
-FOOTER
-=============================== */
+/* ----------------------------------------------------
+   FOOTER
+---------------------------------------------------- */
 .footer {
-  text-align:center; 
-  background:linear-gradient(90deg,var(--primary),var(--secondary)); 
-  color:var(--dark); 
-  padding:25px 30px; 
-  position:relative;
-}
-
-.footer-content {
-  font-size:0.9rem;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.footer a {
-  color:inherit;
-  font-weight:600;
-  text-decoration:none;
-}
-
-.footer a:hover {
-  text-decoration:underline;
-}
-
-/* ===============================
-RESPONSIVE
-=============================== */
-@media(max-width:768px){
-  .projects-grid {
-    grid-template-columns:1fr;
-  }
-  
-  .skills-grid {
-    grid-template-columns:repeat(2, 1fr);
-  }
-  
-  .header h1 {
-    font-size:1.6rem;
-  }
-}
-
-@media(max-width:576px){
-  .header{
-    padding:20px;
-  }
-  
-  .content{
-    padding:20px;
-  }
-  
-  .skills-grid {
-    grid-template-columns:1fr;
-  }
-  
-  .social-links {
-    justify-content:center;
-  }
+  margin-top:60px;
+  padding:30px;
+  text-align:center;
+  background:#111;
+  border-top:2px solid #222;
+  color:#aaa;
 }
 </style>
 </head>
+
 <body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>Serhat Kiraz</h1>
+  <p>Self-Taught Programmer</p>
+</div>
+
 <div class="container">
 
-  <!-- HEADER -->
-  <div class="header">
-    <h1>Serhat Kiraz</h1>
-    <p class="subtitle">Self-Taught Programmer</p>
+  <!-- ABOUT -->
+  <div class="section-title">ABOUT ME</div>
+
+  <div class="about-card">
+    <p>Hello! I'm Serhat.</p>
+    <p>I enjoy creating clean, useful, and experimental projects.  
+       I share my work and progress on GitHub.</p>
+
+    <div class="social-links">
+      <a href="https://github.com/serhatkiraz" target="_blank">
+        <i class="fab fa-github"></i> GitHub
+      </a>
+    </div>
   </div>
 
-  <!-- MAIN CONTENT -->
-  <div class="content">
+  <!-- PROJECTS -->
+  <div class="projects">
+    <div class="section-title">PROJECTS</div>
 
-    <!-- ABOUT SECTION -->
-    <div class="section">
-      <div class="section-title"><i class="fas fa-user"></i> About Me</div>
-      <div class="bio-content">
-        <p>Hi! I'm Serhat!</p>
-        <p>I'm passionate about exploring new ideas. I'm currently working on improving my coding skills. I use GitHub to share my personal projects.</p>
-        
-        <div class="social-links">
-          <a href="https://github.com/serhatkiraz" target="_blank" class="social-link">
-            <i class="fab fa-github"></i> GitHub
-          </a>
+    <div class="project-grid">
+
+      <!-- Mesafe -->
+      <div class="project-card">
+        <i class="fas fa-road"></i>
+        <h3>Mesafe</h3>
+        <p>A tool that shows distances between cities for quick comparisons.</p>
+        <div class="tech-list">
+          <span class="tech">JavaScript</span>
+          <span class="tech">Cities</span>
         </div>
+        <a href="https://serhatkiraz.github.io/mesafe/" class="open-btn">Open Project</a>
       </div>
-    </div>
 
-    <!-- PROJECTS SECTION -->
-    <div class="section">
-      <div class="section-title"><i class="fas fa-code"></i> Projects</div>
-      <div class="projects-grid">
-
-
-                 <!-- MESAFE -->
-        <div class="project-card">
-          <div class="project-icon">
-            <i class="fas fa-tasks"></i>
-          </div>
-          <h3 class="project-title">Mesafe</h3>
-          <p class="project-description">A simple tool that shows distances from a selected city to others. It helps you quickly compare how far cities are from your chosen location. Useful for travel planning or route checking.</p>
-          <div class="project-tech">
-<span class="tech-tag">Distance</span>
-<span class="tech-tag">Cities</span>
-<span class="tech-tag">JavaScript</span>
-          </div>
-          <a href="https://serhatkiraz.github.io/mesafe/" class="btn btn-primary project-link">
-            <i class="fas fa-external-link-alt"></i> Open Project
-          </a>
+      <!-- Hesapsiz -->
+      <div class="project-card">
+        <i class="fas fa-calculator"></i>
+        <h3>Hesapsız</h3>
+        <p>Calculator for extremely large numbers, clean UI & precise math.</p>
+        <div class="tech-list">
+          <span class="tech">JavaScript</span>
+          <span class="tech">Big Numbers</span>
         </div>
-
-         
-        <!-- HESAPSIZ -->
-        <div class="project-card">
-          <div class="project-icon">
-            <i class="fas fa-calculator"></i>
-          </div>
-          <h3 class="project-title">Hesapsiz</h3>
-          <p class="project-description">A web-based calculator designed to handle extremely large numbers, supporting addition, subtraction, multiplication, and division with precise results, a clean UI, copy functionality, and dynamic digit count display.</p>
-          <div class="project-tech">
-            <span class="tech-tag">JavaScript</span>
-            <span class="tech-tag">HTML5</span>
-            <span class="tech-tag">CSS3</span>
-          </div>
-          <a href="https://serhatkiraz.github.io/hesapsiz/" class="btn btn-primary project-link">
-            <i class="fas fa-external-link-alt"></i> Open Project
-          </a>
-        </div>
-
-        <!-- BÖLÜNEBILITY -->
-        <div class="project-card">
-          <div class="project-icon">
-            <i class="fas fa-divide"></i>
-          </div>
-          <h3 class="project-title">Bölünebility</h3>
-          <p class="project-description">A responsive tool for finding divisible, prime, square, and cube numbers within a range. Users can input values, calculate results, and copy or reset them easily.</p>
-          <div class="project-tech">
-            <span class="tech-tag">JavaScript</span>
-            <span class="tech-tag">Mathematics</span>
-            <span class="tech-tag">Algorithm</span>
-          </div>
-          <a href="https://serhatkiraz.github.io/bolunebility/" class="btn btn-primary project-link">
-            <i class="fas fa-external-link-alt"></i> Open Project
-          </a>
-        </div>
-
-        <!-- BİARA -->
-        <div class="project-card">
-          <div class="project-icon">
-            <i class="fas fa-tasks"></i>
-          </div>
-          <h3 class="project-title">BiAra</h3>
-          <p class="project-description">Organize your daily tasks and shopping items in one simple, responsive interface. Add, delete, and reset lists with ease while keeping track of counts for each category.</p>
-          <div class="project-tech">
-            <span class="tech-tag">LocalStorage</span>
-            <span class="tech-tag">UI/UX</span>
-            <span class="tech-tag">Productivity</span>
-          </div>
-          <a href="https://serhatkiraz.github.io/biara/" class="btn btn-primary project-link">
-            <i class="fas fa-external-link-alt"></i> Open Project
-          </a>
-        </div>
-
-
-
-         
-        <!-- TOP HAVUZU -->
-        <div class="project-card">
-          <div class="project-icon">
-            <i class="fas fa-basketball-ball"></i>
-          </div>
-          <h3 class="project-title">Top Havuzu</h3>
-          <p class="project-description">A physics simulation where colorful balls bounce and collide naturally. Select, drag, and mix colors by choosing two balls. Right-click removes balls, reset clears all. Smooth animations and realistic physics in an interactive visual playground.</p>
-          <div class="project-tech">
-            <span class="tech-tag">Canvas API</span>
-            <span class="tech-tag">Physics Engine</span>
-            <span class="tech-tag">Animation</span>
-          </div>
-          <a href="https://serhatkiraz.github.io/tophavuzu/" class="btn btn-primary project-link">
-            <i class="fas fa-external-link-alt"></i> Open Project
-          </a>
-        </div>
-
-
-                 <!-- LUCA -->
-        <div class="project-card">
-          <div class="project-icon">
-            <i class="fas fa-tasks"></i>
-          </div>
-          <h3 class="project-title">LUCA: Last Universal Common Ancestor</h3>
-          <p class="project-description">An evolutionary bio-survival progression shooter warfare saga that follows a rapidly mutating organism fighting through escalating biological threats to out-adapt and ultimately overpower the world-devouring entity known as Primordia.</p>
-          <div class="project-tech">
-<span class="tech-tag">Canvas API</span>
-<span class="tech-tag">Procedural Evolution</span>
-<span class="tech-tag">Bio-Shooter</span>
-
-          </div>
-          <a href="https://serhatkiraz.github.io/LUCA/" class="btn btn-primary project-link">
-            <i class="fas fa-external-link-alt"></i> Open Project
-          </a>
-        </div>
-
-         
+        <a href="https://serhatkiraz.github.io/hesapsiz/" class="open-btn">Open Project</a>
       </div>
-    </div>
 
-    <!-- SKILLS SECTION -->
-    <div class="section">
-      <div class="section-title"><i class="fas fa-cogs"></i> Technologies & Skills</div>
-      <div class="skills-grid">
-        
-        <div class="skill-item">
-          <div class="skill-icon"><i class="fab fa-html5"></i></div>
-          <div class="skill-name">HTML5</div>
+      <!-- Bölünebility -->
+      <div class="project-card">
+        <i class="fas fa-divide"></i>
+        <h3>Bölünebility</h3>
+        <p>Find divisible, prime, square, and cube numbers quickly.</p>
+        <div class="tech-list">
+          <span class="tech">Math</span>
+          <span class="tech">JavaScript</span>
         </div>
-        
-        <div class="skill-item">
-          <div class="skill-icon"><i class="fab fa-css3-alt"></i></div>
-          <div class="skill-name">CSS3</div>
-        </div>
-        
-        <div class="skill-item">
-          <div class="skill-icon"><i class="fab fa-js"></i></div>
-          <div class="skill-name">JavaScript</div>
-        </div>
-        
-        <div class="skill-item">
-          <div class="skill-icon"><i class="fas fa-paint-brush"></i></div>
-          <div class="skill-name">UI/UX Design</div>
-        </div>
-        
-        <div class="skill-item">
-          <div class="skill-icon"><i class="fas fa-mobile-alt"></i></div>
-          <div class="skill-name">Responsive Design</div>
-        </div>
-        
-        <div class="skill-item">
-          <div class="skill-icon"><i class="fas fa-bolt"></i></div>
-          <div class="skill-name">Performance Optimization</div>
-        </div>
-
+        <a href="https://serhatkiraz.github.io/bolunebility/" class="open-btn">Open Project</a>
       </div>
-    </div>
 
+      <!-- BiAra -->
+      <div class="project-card">
+        <i class="fas fa-list-ul"></i>
+        <h3>BiAra</h3>
+        <p>Daily tasks & shopping list manager with LocalStorage.</p>
+        <div class="tech-list">
+          <span class="tech">Productivity</span>
+          <span class="tech">LocalStorage</span>
+        </div>
+        <a href="https://serhatkiraz.github.io/biara/" class="open-btn">Open Project</a>
+      </div>
+
+      <!-- Top Havuzu -->
+      <div class="project-card">
+        <i class="fas fa-circle"></i>
+        <h3>Top Havuzu</h3>
+        <p>Colorful physics sandbox with collisions, mixing & interactions.</p>
+        <div class="tech-list">
+          <span class="tech">Canvas</span>
+          <span class="tech">Physics</span>
+        </div>
+        <a href="https://serhatkiraz.github.io/tophavuzu/" class="open-btn">Open Project</a>
+      </div>
+
+      <!-- LUCA -->
+      <div class="project-card">
+        <i class="fas fa-dna"></i>
+        <h3>LUCA</h3>
+        <p>Bio-survival evolution shooter about rapid adaptation.</p>
+        <div class="tech-list">
+          <span class="tech">Canvas</span>
+          <span class="tech">Evolution</span>
+        </div>
+        <a href="https://serhatkiraz.github.io/LUCA/" class="open-btn">Open Project</a>
+      </div>
+
+    </div>
   </div>
 
-  <!-- FOOTER -->
-  <div class="footer">
-    <div class="footer-content">
-      <p><i class="far fa-copyright"></i> <a href="https://serhatkiraz.github.io/" target="_blank">Serhat Kiraz</a></p>
+  <!-- SKILLS -->
+  <div class="skills">
+    <div class="section-title">TECHNOLOGIES</div>
+
+    <div class="skills-grid">
+      <div class="skill"><i class="fab fa-html5"></i> HTML5</div>
+      <div class="skill"><i class="fab fa-css3-alt"></i> CSS3</div>
+      <div class="skill"><i class="fab fa-js"></i> JavaScript</div>
+      <div class="skill"><i class="fas fa-paint-brush"></i> UI/UX</div>
+      <div class="skill"><i class="fas fa-mobile"></i> Responsive Design</div>
+      <div class="skill"><i class="fas fa-bolt"></i> Optimization</div>
     </div>
   </div>
 
 </div>
 
-<script>
-// Page load animation effects
-document.addEventListener('DOMContentLoaded', function() {
-  // Sequential fade-in effect for project cards
-  const projectCards = document.querySelectorAll('.project-card');
-  projectCards.forEach((card, index) => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    
-    setTimeout(() => {
-      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-      card.style.opacity = '1';
-      card.style.transform = 'translateY(0)';
-    }, 100 * index);
-  });
-  
-  // Animation for skill items
-  const skillItems = document.querySelectorAll('.skill-item');
-  skillItems.forEach((item, index) => {
-    item.style.opacity = '0';
-    item.style.transform = 'translateX(-20px)';
-    
-    setTimeout(() => {
-      item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      item.style.opacity = '1';
-      item.style.transform = 'translateX(0)';
-    }, 300 + (50 * index));
-  });
-  
-  // Button hover effects
-  const buttons = document.querySelectorAll('.btn');
-  buttons.forEach(button => {
-    button.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-3px)';
-    });
-    
-    button.addEventListener('mouseleave', function() {
-      this.style.transform = 'translateY(0)';
-    });
-  });
-});
-</script>
+<!-- FOOTER -->
+<div class="footer">
+  © 2025 <a href="https://serhatkiraz.github.io/" target="_self">Serhat Kiraz</a>
+</div>
+
 </body>
 </html>
