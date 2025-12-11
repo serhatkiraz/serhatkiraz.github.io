@@ -15,19 +15,25 @@
   }
 
   html,body{height:100%;margin:0;padding:0;overflow:hidden;background:var(--bg);touch-action:none;-webkit-user-select:none;user-select:none;}
-  /* world container: geniş dünya burada, kamera translate ile hareket eder */
-  #world{position:absolute;left:0;top:0;height:100%;transform-origin:0 0;will-change:transform;}
+  /* world container: geniş dünya burada, kamera topun merkezini takip eder */
+  #world{position:absolute;left:50%;top:50%;transform-origin:0 0;will-change:transform;}
 
   /* ground & platforms */
   #ground{position:absolute;left:0;bottom:0;height:12px;background:#222;width:100%;}
   .platform{position:absolute;background:var(--accent2);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
 
-  /* ball */
-  #ball{position:absolute;border-radius:50%;
-        width:64px;height:64px;
-        background:radial-gradient(circle at 30% 30%, #7a43b0, var(--accent));
-        box-shadow:inset -8px -8px 16px rgba(0,0,0,0.4),0 0 30px rgba(85,37,131,0.25);
-        will-change:transform,left,top;}
+  /* ball - DAİMA EKRAN MERKEZİNDE */
+  #ball{
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    border-radius:50%;
+    width:64px;height:64px;
+    background:radial-gradient(circle at 30% 30%, #7a43b0, var(--accent));
+    box-shadow:inset -8px -8px 16px rgba(0,0,0,0.4),0 0 30px rgba(85,37,131,0.25);
+    z-index: 1000;
+  }
 
   /* Labels */
   .label{position:absolute;color:#fff;font-family:Arial,Helvetica,sans-serif;font-weight:1000;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,0.6);pointer-events:none;}
@@ -41,24 +47,117 @@
     pointer-events: none !important;
   }
 
+  /* Gyroscope destek uyarısı */
+  #gyroWarning {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    z-index: 10000;
+    display: none;
+    max-width: 90%;
+    border: 2px solid var(--accent2);
+  }
 
+  #gyroWarning.show {
+    display: block;
+  }
 
+  #gyroWarning button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
 
+  #gyroWarning button:hover {
+    background: var(--accent2);
+  }
 
+  /* Gyroscope simülasyonu için PC kontrolleri */
+  #pcControls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: rgba(0,0,0,0.7);
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 9999;
+    display: none;
+  }
 
+  #pcControls.show {
+    display: block;
+  }
 
+  #pcControls button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
 
-
+  /* Hız göstergesi */
+  #speedIndicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    z-index: 9999;
+    border-left: 4px solid var(--accent2);
+  }
 </style>
 </head>
 <body>
+  <div id="gyroWarning">
+    <p>Bu oyun telefonunuzun eğilmesiyle kontrol ediliyor.</p>
+    <p>Telefonu sola eğin: Dünya sağa kayar</p>
+    <p>Telefonu sağa eğin: Dünya sola kayar</p>
+    <p>Ekrana dokunun: Top zıplar</p>
+    <button id="dismissWarning">Tamam</button>
+  </div>
 
+  <div id="pcControls">
+    <p>PC'de oynuyorsunuz. Aşağıdaki tuşları kullanın:</p>
+    <p>← → : Dünyayı hareket ettir</p>
+    <p>Space veya ↑ : Zıpla</p>
+    <p>veya telefonunuzda açın</p>
+  </div>
+
+  <div id="speedIndicator">
+    Hız: <span id="speedValue">0</span><br>
+    Gamma: <span id="gammaValue">0</span>
+  </div>
 
   <div id="world">
     <div id="ground"></div>
     <!-- platformlar ve label'lar script ile eklenecek -->
-    <div id="ball"></div>
   </div>
+
+  <!-- TOP ARTIK FIXED POSITION'DA -->
+  <div id="ball"></div>
 
 <script>
 /* ----------------- Ayarlar (burayı kolayca değiştir) ----------------- */
@@ -67,25 +166,38 @@ let ballSize = 49;                 // başlangıç boyutu (px)
 let gravity = 0.6;                 // yerçekimi
 let friction = 0.93;              // hava sürtünmesi (1'e yakın)
 let groundFriction = 0.93;         // yerdeki x sürtünmesi (0-1)
-let moveSpeed = 0.5;               // tuşa/basılı tutmaya eklenen x ivme
+let moveSpeed = 0.5;               // ivme
 let maxSpeed = 6;                 // maksimum x hız
 let jumpForce = 20;                // zıplama kuvveti
 let bounce = 0.25;                 // zıplama geri tepmesi
-let gyroSensitivity = 0.1;         // gyroscope hassasiyeti
+let gyroSensitivity = 0.15;        // gyroscope hassasiyeti (artırıldı)
+let cameraFollowSpeed = 0.1;       // kameranın takip hızı
 /* -------------------------------------------------------------------- */
 
 const world = document.getElementById('world');
 const ball = document.getElementById('ball');
-
+const gyroWarning = document.getElementById('gyroWarning');
+const pcControls = document.getElementById('pcControls');
 const dismissWarning = document.getElementById('dismissWarning');
+const speedValue = document.getElementById('speedValue');
+const gammaValue = document.getElementById('gammaValue');
 
 let w = window.innerWidth, h = window.innerHeight;
 let worldWidth = w * WORLD_PAGES;
 let worldHeight = h;
-let scrollX = 0, maxScrollX = Math.max(0, worldWidth - w);
 
-let ballX=0, ballY=0, vx=0, vy=0;
-let isOnGround=false, onPlatform=null;
+// DÜNYA KONUMU (top daima ekran ortasında, dünya hareket eder)
+let worldX = 0; // Dünyanın X pozisyonu
+let worldY = 0; // Dünyanın Y pozisyonu
+let targetWorldX = 0;
+let targetWorldY = 0;
+
+// TOPUN DÜNYA İÇİNDEKİ GERÇEK POZİSYONU
+let ballWorldX = 0; // Topun dünya koordinatlarındaki X'i
+let ballWorldY = 0; // Topun dünya koordinatlarındaki Y'si
+let vx = 0, vy = 0; // Hız vektörleri
+
+let isOnGround = false, onPlatform = null;
 let keys = {left:false,right:false,up:false};
 
 // Gyroscope değişkenleri
@@ -107,7 +219,10 @@ function buildWorld(){
   worldWidth = Math.max(w * 2, w * WORLD_PAGES);
   world.style.width = worldWidth + 'px';
   world.style.height = h + 'px';
-  maxScrollX = Math.max(0, worldWidth - w);
+  
+  // Dünyayı merkeze yerleştir
+  world.style.left = '50%';
+  world.style.top = '50%';
 
   // remove existing platforms
   platforms.forEach(p => { if(p.el) p.el.remove(); if(p.label) p.label.remove(); });
@@ -154,20 +269,33 @@ function buildWorld(){
 function init(){
   buildWorld();
   ball.style.width = ball.style.height = ballSize + 'px';
-  // place ball on first platform
+  
+  // place ball on first platform (dünya koordinatlarında)
   if(platforms[0]){
-    ballX = platforms[0].x + (platforms[0].width/2) - ballSize/2;
-    ballY = platforms[0].y - ballSize - 6;
+    ballWorldX = platforms[0].x + (platforms[0].width/2) - ballSize/2;
+    ballWorldY = platforms[0].y - ballSize - 6;
   } else {
-    ballX = 20; ballY = h/2;
+    ballWorldX = worldWidth/2; 
+    ballWorldY = h/2;
   }
+  
+  // Kamerayı topun başlangıç pozisyonuna odakla
+  worldX = -ballWorldX + w/2 - ballSize/2;
+  worldY = -ballWorldY + h/2 - ballSize/2;
+  updateWorldPosition();
   
   // Gyroscope'u başlat
   initGyroscope();
   
-
+  // Cihaz tipine göre uyarı göster
+  if (isMobile && !isGyroAvailable) {
+    setTimeout(() => {
+      gyroWarning.classList.add('show');
+    }, 1000);
+  } else if (!isMobile) {
+    pcControls.classList.add('show');
+  }
   
-  update(); 
   requestAnimationFrame(loop);
 }
 
@@ -201,22 +329,25 @@ function handleOrientation(event) {
   beta = event.beta;  // Öne/arkaya eğim (-180 to 180)
   gamma = event.gamma; // Sola/sağa eğim (-90 to 90)
   
+  // Gamma değerini güncelle (hız göstergesi için)
+  gammaValue.textContent = gamma ? gamma.toFixed(1) : "0";
+  
   // Gamma değerini normalize et (-90 to 90 arası)
   // Telefon düz dururken gamma = 0
   // Sağa eğince pozitif, sola eğince negatif
   if (gamma !== null) {
-    // Hassasiyeti ayarla
+    // Hassasiyeti ayarla - daha responsive hale getir
     let tilt = gamma * gyroSensitivity;
     
     // Eşik değerleri (küçük eğimleri yok say)
-    const threshold = 2;
+    const threshold = 1;
     if (Math.abs(tilt) > threshold) {
       if (tilt > 0) {
-        // Sağa eğilmiş - sağa git
+        // Sağa eğilmiş - top sola git (dünya sağa kay)
         keys.right = true;
         keys.left = false;
       } else {
-        // Sola eğilmiş - sola git
+        // Sola eğilmiş - top sağa git (dünya sola kay)
         keys.left = true;
         keys.right = false;
       }
@@ -228,30 +359,21 @@ function handleOrientation(event) {
   }
 }
 
-/* camera keeps ball centered horizontally */
-function updateCamera(){
-  const target = ballX - (w/2) + (ballSize/2);
-  scrollX = Math.max(0, Math.min(target, maxScrollX));
-  world.style.transform = `translateX(${-scrollX}px)`;
-}
-
-/* update ball element */
-function update(){
-  ball.style.left = ballX + 'px';
-  ball.style.top = ballY + 'px';
-  ball.style.width = ball.style.height = Math.max(36, ballSize) + 'px';
+/* Dünya pozisyonunu güncelle */
+function updateWorldPosition() {
+  world.style.transform = `translate(${worldX}px, ${worldY}px)`;
 }
 
 /* collisions with platforms */
 function checkPlatformCollision(p){
   const platTop = p.y, platBottom = p.y + p.height;
   const platLeft = p.x, platRight = p.x + p.width;
-  const ballTop = ballY, ballBottom = ballY + ballSize;
-  const ballLeft = ballX, ballRight = ballX + ballSize;
+  const ballTop = ballWorldY, ballBottom = ballWorldY + ballSize;
+  const ballLeft = ballWorldX, ballRight = ballWorldX + ballSize;
 
   // landing on top
   if(ballRight > platLeft && ballLeft < platRight && ballBottom > platTop && ballTop < platTop && vy > 0){
-    ballY = platTop - ballSize;
+    ballWorldY = platTop - ballSize;
     vy = -vy * bounce;
     onPlatform = p;
     isOnGround = false;
@@ -259,17 +381,17 @@ function checkPlatformCollision(p){
   }
   // hit head under platform
   if(ballRight > platLeft && ballLeft < platRight && ballTop < platBottom && ballBottom > platBottom && vy < 0){
-    ballY = platBottom;
+    ballWorldY = platBottom;
     vy = -vy * bounce;
     return true;
   }
   // horizontal collisions (simple)
   if(ballBottom > platTop && ballTop < platBottom){
     if(ballRight > platLeft && ballLeft < platLeft && vx > 0){
-      ballX = platLeft - ballSize; vx = -vx * bounce; return true;
+      ballWorldX = platLeft - ballSize; vx = -vx * bounce; return true;
     }
     if(ballLeft < platRight && ballRight > platRight && vx < 0){
-      ballX = platRight; vx = -vx * bounce; return true;
+      ballWorldX = platRight; vx = -vx * bounce; return true;
     }
   }
 
@@ -290,20 +412,29 @@ function loop(){
   // clamp speed
   vx = Math.max(-maxSpeed, Math.min(maxSpeed, vx));
 
-  // integrate
-  ballX += vx;
-  ballY += vy;
+  // Hız göstergesini güncelle
+  speedValue.textContent = Math.abs(vx).toFixed(1);
+
+  // integrate - TOPUN DÜNYA İÇİNDEKİ POZİSYONUNU GÜNCELLE
+  ballWorldX += vx;
+  ballWorldY += vy;
 
   // platform collisions
   let hit = false;
-  for(const p of platforms) { if(checkPlatformCollision(p)){ hit = true; break; } }
+  for(const p of platforms) { 
+    if(checkPlatformCollision(p)){ 
+      hit = true; 
+      break; 
+    } 
+  }
 
   if(!hit){
-    const groundY = worldHeight - 12 - ballSize;
-    if(ballY > groundY){
-      ballY = groundY;
+    const groundY = h - 12 - ballSize;
+    if(ballWorldY > groundY){
+      ballWorldY = groundY;
       vy = -vy * bounce;
-      isOnGround = true; onPlatform = null;
+      isOnGround = true; 
+      onPlatform = null;
       if(Math.abs(vy) < 0.5) vy = 0;
     } else {
       isOnGround = false;
@@ -311,12 +442,29 @@ function loop(){
   }
 
   // simple world bounds
-  if(ballX < 0){ ballX = 0; vx = -vx * bounce; }
-  if(ballX > worldWidth - ballSize){ ballX = worldWidth - ballSize; vx = -vx * bounce; }
-  if(ballY < 0){ ballY = 0; vy = -vy * bounce; }
+  if(ballWorldX < 0){ 
+    ballWorldX = 0; 
+    vx = -vx * bounce; 
+  }
+  if(ballWorldX > worldWidth - ballSize){ 
+    ballWorldX = worldWidth - ballSize; 
+    vx = -vx * bounce; 
+  }
+  if(ballWorldY < 0){ 
+    ballWorldY = 0; 
+    vy = -vy * bounce; 
+  }
 
-  update();
-  updateCamera();
+  // KAMERA TAKİBİ - Top daima ekran ortasında kalsın
+  // Dünyayı, top ekranın ortasında kalacak şekilde kaydır
+  targetWorldX = -ballWorldX + w/2 - ballSize/2;
+  targetWorldY = -ballWorldY + h/2 - ballSize/2;
+  
+  // Yumuşak kamera takibi (lerp)
+  worldX += (targetWorldX - worldX) * cameraFollowSpeed;
+  worldY += (targetWorldY - worldY) * cameraFollowSpeed;
+  
+  updateWorldPosition();
   requestAnimationFrame(loop);
 }
 
@@ -358,9 +506,21 @@ window.addEventListener('keyup', e => {
   if(e.key === 'ArrowRight') keys.right = false;
 });
 
+/* Uyarıyı kapat */
+dismissWarning.addEventListener('click', function() {
+  gyroWarning.classList.remove('show');
+});
 
 /* handle resize */
-window.addEventListener('resize', ()=>{ buildWorld(); init(); });
+window.addEventListener('resize', ()=>{ 
+  w = window.innerWidth; 
+  h = window.innerHeight;
+  buildWorld(); 
+  
+  // Yeniden boyutlandırma sonrası kamera pozisyonunu güncelle
+  targetWorldX = -ballWorldX + w/2 - ballSize/2;
+  targetWorldY = -ballWorldY + h/2 - ballSize/2;
+});
 
 /* start */
 init();
