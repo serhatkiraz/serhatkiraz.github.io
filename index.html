@@ -1,371 +1,364 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Serhat Kiraz — Portfolio</title>
-
-<!-- Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Serhat Kiraz</title>
 <style>
-/* ----------------------------------------------------
-   COLOR VARIABLES
----------------------------------------------------- */
-:root {
-  --primary:#552583;
-  --secondary:#FDB927;
-  --dark:#000;
-  --light:#808080;
-  --card:#111;
-  --border:#222;
+  :root{
+    --bg:#0b0b0d;
+    --accent:#552583; /* mor */
+    --accent2:#FDB927; /* altın */
+    --ui-alpha:0.14;
+    --ui-size:18vmin;
+    --btn-size:18vmin;
+  }
+
+  html,body{height:100%;margin:0;padding:0;overflow:hidden;background:var(--bg);touch-action:none;-webkit-user-select:none;user-select:none;}
+  /* world container: geniş dünya burada, kamera translate ile hareket eder */
+  #world{position:absolute;left:0;top:0;height:100%;transform-origin:0 0;will-change:transform;}
+
+  /* ground & platforms */
+  #ground{position:absolute;left:0;bottom:0;height:12px;background:#222;width:100%;}
+  .platform{position:absolute;background:var(--accent2);border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
+
+  /* ball */
+  #ball{position:absolute;border-radius:50%;
+        width:64px;height:64px;
+        background:radial-gradient(circle at 30% 30%, #7a43b0, var(--accent));
+        box-shadow:inset -8px -8px 16px rgba(0,0,0,0.4),0 0 30px rgba(85,37,131,0.25);
+        will-change:transform,left,top;}
+
+  /* Labels */
+  .label{position:absolute;color:#fff;font-family:Arial,Helvetica,sans-serif;font-weight:1000;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,0.6);pointer-events:none;}
+
+  /* Mobile controls (visible) */
+  .ctrl{
+    position:fixed;bottom:10px;left:10px;right:10px;pointer-events:none;
+    display:flex;justify-content:space-between;align-items:flex-end;gap:12px;z-index:9999;
+  }
+  .touch-area{flex:1;height:calc(var(--btn-size));display:flex;gap:12px;pointer-events:auto;align-items:center;}
+  .btn{
+    width:calc(var(--btn-size));height:calc(var(--btn-size));border-radius:14px;
+    background:rgba(85,37,131,var(--ui-alpha));backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;border:2px solid rgba(255,255,255,0.06);
+    box-shadow:0 6px 18px rgba(0,0,0,0.5);
+    -webkit-tap-highlight-color: transparent;
+    touch-action:none;
+  }
+  .btn.large{width:calc(var(--btn-size) + 8px);height:calc(var(--btn-size) + 8px);border-radius:50%;}
+  .invisible-zone{position:fixed;top:0;bottom:0;width:50%;pointer-events:auto;z-index:900;}
+  .left-zone{left:0;}
+  .right-zone{right:0;}
+.jump{
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 9998;
 }
 
-/* ----------------------------------------------------
-   GLOBAL
----------------------------------------------------- */
-* {
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Inter', sans-serif;
+/* PC / geniş ekranlarda tüm mobil tuşları gizle */
+@media (min-width: 900px) {
+  .ctrl,
+  .jump,
+  .invisible-zone {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
 }
 
-body {
-  background:#000;
-  color:white;
-  line-height:1.6;
-}
-
-a {
-  text-decoration:none;
-  color:inherit;
-}
-
-/* ----------------------------------------------------
-   HEADER
----------------------------------------------------- */
-.header {
-  padding:70px 20px;
-  text-align:center;
-  background: radial-gradient(circle at top, #552583, #000 65%);
-}
-
-.header h1 {
-  font-size:3rem;
-  font-weight:900;
-  letter-spacing:1px;
-}
-
-.header p {
-  margin-top:12px;
-  font-size:1.2rem;
-  opacity:0.9;
-}
-
-/* ----------------------------------------------------
-   MAIN CONTAINER
----------------------------------------------------- */
-.container {
-  width:100%;
-  max-width:1150px;
-  margin:50px auto;
-  padding:20px;
-}
-
-/* ----------------------------------------------------
-   SECTION TITLES
----------------------------------------------------- */
-.section-title {
-  font-size:1.8rem;
-  margin-bottom:25px;
-  font-weight:700;
-  color:var(--secondary);
-  letter-spacing:1px;
-  position:relative;
-}
-
-.section-title:after {
-  content:"";
-  position:absolute;
-  left:0;
-  bottom:-8px;
-  width:60px;
-  height:3px;
-  background:var(--primary);
-}
-
-/* ----------------------------------------------------
-   ABOUT CARD
----------------------------------------------------- */
-.about-card {
-  background:var(--card);
-  padding:30px;
-  border-radius:15px;
-  border:1px solid var(--border);
-  box-shadow:0 0 40px rgba(85,37,131,0.25);
-}
-
-.social-links {
-  margin-top:20px;
-  display:flex;
-  gap:15px;
-}
-
-.social-links a {
-  background:var(--primary);
-  padding:10px 18px;
-  border-radius:8px;
-  font-weight:600;
-  transition:0.3s;
-}
-
-.social-links a:hover {
-  background:var(--secondary);
-  color:#000;
-}
-
-/* ----------------------------------------------------
-   PROJECT GRID
----------------------------------------------------- */
-.projects {
-  margin-top:50px;
-}
-
-.project-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
-  gap:25px;
-}
-
-.project-card {
-  background:#111;
-  border:1px solid #222;
-  border-radius:15px;
-  padding:25px;
-  transition:0.3s;
-  display:flex;
-  flex-direction:column;
-}
-
-.project-card:hover {
-  transform:translateY(-6px);
-  box-shadow:0 0 20px rgba(253,185,39,0.25);
-}
-
-.project-card i {
-  font-size:2.2rem;
-  color:var(--secondary);
-}
-
-.project-card h3 {
-  margin:15px 0 10px;
-  font-size:1.3rem;
-}
-
-.tech-list {
-  margin:10px 0 15px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-.tech {
-  background:rgba(253,185,39,0.15);
-  padding:6px 12px;
-  border-radius:20px;
-  font-size:0.85rem;
-  font-weight:600;
-  color:var(--secondary);
-}
-
-.project-card .open-btn {
-  margin-top:auto;
-  background:var(--primary);
-  padding:10px 14px;
-  font-weight:600;
-  border-radius:8px;
-  transition:0.3s;
-}
-
-.project-card .open-btn:hover {
-  background:var(--secondary);
-  color:#000;
-}
-
-/* ----------------------------------------------------
-   SKILLS
----------------------------------------------------- */
-.skills-grid {
-  margin-top:20px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
-  gap:15px;
-}
-
-.skill {
-  background:#111;
-  padding:15px;
-  border-radius:10px;
-  border:1px solid #222;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  transition:0.3s;
-}
-
-.skill:hover {
-  transform:translateY(-4px);
-  box-shadow:0 0 15px rgba(85,37,131,0.3);
-}
-
-.skill i {
-  font-size:1.5rem;
-  color:var(--secondary);
-}
-
-/* ----------------------------------------------------
-   FOOTER
----------------------------------------------------- */
-.footer {
-  margin-top:60px;
-  padding:30px;
-  text-align:center;
-  background:#111;
-  border-top:2px solid #222;
-  color:#aaa;
-}
 </style>
 </head>
-
 <body>
+  <div id="world">
+    <div id="ground"></div>
+    <!-- platformlar ve label'lar script ile eklenecek -->
+    <div id="ball"></div>
+  </div>
 
-<!-- HEADER -->
-<div class="header">
-  <h1>Serhat Kiraz</h1>
-  <p>Self-Taught Programmer</p>
-</div>
+  <!-- Görsel dokunmatik bölgeler: yarım ekranlar -->
+  <div class="invisible-zone left-zone" id="leftZone" aria-hidden="true"></div>
+  <div class="invisible-zone right-zone" id="rightZone" aria-hidden="true"></div>
 
-<div class="container">
-
-  <!-- ABOUT -->
-  <div class="section-title">ABOUT ME</div>
-
-  <div class="about-card">
-    <p>Hello! I'm Serhat.</p>
-    <p>I'm passionate about exploring new ideas. I'm currently working on improving my coding skills. I use GitHub to share my personal projects.</p>
-
-    <div class="social-links">
-      <a href="https://github.com/serhatkiraz" target="_blank">
-        <i class="fab fa-github"></i> GitHub
-      </a>
+  <!-- Görsel butonlar (opsiyonel görsel destek) -->
+  <div class="ctrl">
+    <div class="touch-area">
+      <div class="btn" id="leftBtn">◀</div>
+    </div>
+    <div class="touch-area" style="justify-content:flex-end">
+      <div class="btn" id="rightBtn">▶</div>
     </div>
   </div>
 
-  <!-- PROJECTS -->
-  <div class="projects">
-    <div class="section-title">PROJECTS</div>
-
-    <div class="project-grid">
-
-      <!-- Mesafe -->
-      <div class="project-card">
-        <i class="fas fa-road"></i>
-        <h3>Mesafe</h3>
-        <p>A tool that shows distances between cities for quick comparisons.</p>
-        <div class="tech-list">
-          <span class="tech">JavaScript</span>
-          <span class="tech">Cities</span>
-        </div>
-        <a href="https://serhatkiraz.github.io/mesafe/" class="open-btn">Open Project</a>
-      </div>
-
-      <!-- Hesapsiz -->
-      <div class="project-card">
-        <i class="fas fa-calculator"></i>
-        <h3>Hesapsız</h3>
-        <p>Calculator for extremely large numbers, clean UI & precise math.</p>
-        <div class="tech-list">
-          <span class="tech">JavaScript</span>
-          <span class="tech">Big Numbers</span>
-        </div>
-        <a href="https://serhatkiraz.github.io/hesapsiz/" class="open-btn">Open Project</a>
-      </div>
-
-      <!-- Bölünebility -->
-      <div class="project-card">
-        <i class="fas fa-divide"></i>
-        <h3>Bölünebility</h3>
-        <p>Find divisible, prime, square, and cube numbers quickly.</p>
-        <div class="tech-list">
-          <span class="tech">Math</span>
-          <span class="tech">JavaScript</span>
-        </div>
-        <a href="https://serhatkiraz.github.io/bolunebility/" class="open-btn">Open Project</a>
-      </div>
-
-      <!-- BiAra -->
-      <div class="project-card">
-        <i class="fas fa-list-ul"></i>
-        <h3>BiAra</h3>
-        <p>Daily tasks & shopping list manager with LocalStorage.</p>
-        <div class="tech-list">
-          <span class="tech">Productivity</span>
-          <span class="tech">LocalStorage</span>
-        </div>
-        <a href="https://serhatkiraz.github.io/biara/" class="open-btn">Open Project</a>
-      </div>
-
-      <!-- Top Havuzu -->
-      <div class="project-card">
-        <i class="fas fa-circle"></i>
-        <h3>Top Havuzu</h3>
-        <p>Colorful physics sandbox with collisions, mixing & interactions.</p>
-        <div class="tech-list">
-          <span class="tech">Canvas</span>
-          <span class="tech">Physics</span>
-        </div>
-        <a href="https://serhatkiraz.github.io/tophavuzu/" class="open-btn">Open Project</a>
-      </div>
-
-      <!-- LUCA -->
-      <div class="project-card">
-        <i class="fas fa-dna"></i>
-        <h3>LUCA</h3>
-        <p>Bio-survival evolution shooter about rapid adaptation.</p>
-        <div class="tech-list">
-          <span class="tech">Canvas</span>
-          <span class="tech">Evolution</span>
-        </div>
-        <a href="https://serhatkiraz.github.io/LUCA/" class="open-btn">Open Project</a>
-      </div>
-
-    </div>
+  <div class="jump">
+    <div class="btn large" id="jumpBtn">Zıpla</div>
   </div>
 
-  <!-- SKILLS -->
-  <div class="skills">
-    <div class="section-title"><br>TECHNOLOGIES</div>
 
-    <div class="skills-grid">
-      <div class="skill"><i class="fab fa-html5"></i> HTML5</div>
-      <div class="skill"><i class="fab fa-css3-alt"></i> CSS3</div>
-      <div class="skill"><i class="fab fa-js"></i> JavaScript</div>
-      <div class="skill"><i class="fas fa-paint-brush"></i> UI/UX</div>
-      <div class="skill"><i class="fas fa-mobile"></i> Responsive Design</div>
-      <div class="skill"><i class="fas fa-bolt"></i> Optimization</div>
-    </div>
-  </div>
 
-</div>
+<script>
+/* ----------------- Ayarlar (burayı kolayca değiştir) ----------------- */
+let WORLD_PAGES = 10;              // kaç ekran genişliği uzunluğunda dünya
+let ballSize = 49;                 // başlangıç boyutu (px)
+let gravity = 0.6;                 // yerçekimi
+let friction = 0.93;              // hava sürtünmesi (1'e yakın)
+let groundFriction = 0.93;         // yerdeki x sürtünmesi (0-1)
+let moveSpeed = 0.5;               // tuşa/basılı tutmaya eklenen x ivme
+let maxSpeed = 6;                 // maksimum x hız
+let jumpForce = 20;                // zıplama kuvveti
+let bounce = 0.25;                 // zıplama geri tepmesi
+/* -------------------------------------------------------------------- */
 
-<!-- FOOTER -->
-<div class="footer">
-  © 2025 <a href="https://serhatkiraz.github.io/" target="_self">Serhat Kiraz</a>
-</div>
+const world = document.getElementById('world');
+const ball = document.getElementById('ball');
+const leftZone = document.getElementById('leftZone');
+const rightZone = document.getElementById('rightZone');
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+const jumpBtn = document.getElementById('jumpBtn');
 
+let w = window.innerWidth, h = window.innerHeight;
+let worldWidth = w * WORLD_PAGES;
+let worldHeight = h;
+let scrollX = 0, maxScrollX = Math.max(0, worldWidth - w);
+
+let ballX=0, ballY=0, vx=0, vy=0;
+let isOnGround=false, onPlatform=null;
+let keys = {left:false,right:false,up:false};
+
+const platforms = [];
+const platformW = Math.round(Math.max(200, w * 0.2));
+const platformH = 18;
+
+/* Prevent default scroll on touch move to avoid page bouncing */
+document.addEventListener('touchmove', e => { e.preventDefault(); }, {passive:false});
+
+/* Build world size and platforms */
+function buildWorld(){
+  w = window.innerWidth; h = window.innerHeight;
+  worldWidth = Math.max(w * 2, w * WORLD_PAGES);
+  world.style.width = worldWidth + 'px';
+  world.style.height = h + 'px';
+  maxScrollX = Math.max(0, worldWidth - w);
+
+  // remove existing platforms
+  platforms.forEach(p => { if(p.el) p.el.remove(); if(p.label) p.label.remove(); });
+  platforms.length = 0;
+
+  // positions (relative to worldWidth)
+  const pos = [
+    {x: worldWidth * 0.03, y: h * 0.78, text:'Hi!'},
+    {x: worldWidth * 0.12, y: h * 0.55, text:"I am Serhat"},
+    {x: worldWidth * 0.32, y: h * 0.75, text:'I am passionate about exploring new ideas'},
+    {x: worldWidth * 0.52, y: h * 0.68, text:'I enjoy coding solid and unique apps'},
+    {x: worldWidth * 0.72, y: h * 0.58, text:'This are my finished projects'},
+    {x: worldWidth * 0.90, y: h * 0.48, text:'Feel free to contact me'}
+  ];
+
+  pos.forEach((p,i) => {
+    const el = document.createElement('div');
+    el.className='platform';
+    el.style.width = platformW+'px';
+    el.style.height = platformH+'px';
+    el.style.left = p.x + 'px';
+    el.style.top = p.y + 'px';
+    world.appendChild(el);
+
+    const label = document.createElement('div');
+    label.className='label';
+    label.style.left = p.x + 'px';
+    label.style.top = (p.y - 70) + 'px';
+    label.style.width = platformW + 'px';
+    label.textContent = p.text;
+    world.appendChild(label);
+
+    platforms.push({x:p.x,y:p.y,width:platformW,height:platformH,el,label});
+  });
+
+  // ground width covers world
+  const grd = document.getElementById('ground');
+  grd.style.width = worldWidth + 'px';
+  grd.style.left = '0px';
+  grd.style.top = (h - 12) + 'px';
+}
+
+/* initialize ball on first platform */
+function init(){
+  buildWorld();
+  ball.style.width = ball.style.height = ballSize + 'px';
+  // place ball on first platform
+  if(platforms[0]){
+    ballX = platforms[0].x + (platforms[0].width/2) - ballSize/2;
+    ballY = platforms[0].y - ballSize - 6;
+  } else {
+    ballX = 20; ballY = h/2;
+  }
+  update(); requestAnimationFrame(loop);
+}
+
+/* camera keeps ball centered horizontally */
+function updateCamera(){
+  const target = ballX - (w/2) + (ballSize/2);
+  scrollX = Math.max(0, Math.min(target, maxScrollX));
+  world.style.transform = `translateX(${-scrollX}px)`;
+}
+
+/* update ball element */
+function update(){
+  ball.style.left = ballX + 'px';
+  ball.style.top = ballY + 'px';
+  ball.style.width = ball.style.height = Math.max(36, ballSize) + 'px';
+}
+
+/* collisions with platforms */
+function checkPlatformCollision(p){
+  const platTop = p.y, platBottom = p.y + p.height;
+  const platLeft = p.x, platRight = p.x + p.width;
+  const ballTop = ballY, ballBottom = ballY + ballSize;
+  const ballLeft = ballX, ballRight = ballX + ballSize;
+
+  // landing on top
+  if(ballRight > platLeft && ballLeft < platRight && ballBottom > platTop && ballTop < platTop && vy > 0){
+    ballY = platTop - ballSize;
+    vy = -vy * bounce;
+    onPlatform = p;
+    isOnGround = false;
+    return true;
+  }
+  // hit head under platform
+  if(ballRight > platLeft && ballLeft < platRight && ballTop < platBottom && ballBottom > platBottom && vy < 0){
+    ballY = platBottom;
+    vy = -vy * bounce;
+    return true;
+  }
+  // horizontal collisions (simple)
+  if(ballBottom > platTop && ballTop < platBottom){
+    if(ballRight > platLeft && ballLeft < platLeft && vx > 0){
+      ballX = platLeft - ballSize; vx = -vx * bounce; return true;
+    }
+    if(ballLeft < platRight && ballRight > platRight && vx < 0){
+      ballX = platRight; vx = -vx * bounce; return true;
+    }
+  }
+
+  if(onPlatform === p && !(ballBottom === platTop)) onPlatform = null;
+  return false;
+}
+
+/* main loop */
+function loop(){
+  // apply gravity & friction
+  vy += gravity;
+  vx *= friction;
+
+  // apply control
+  if(keys.left) vx -= moveSpeed;
+  if(keys.right) vx += moveSpeed;
+
+  // clamp speed
+  vx = Math.max(-maxSpeed, Math.min(maxSpeed, vx));
+
+  // integrate
+  ballX += vx;
+  ballY += vy;
+
+  // platform collisions
+  let hit = false;
+  for(const p of platforms) { if(checkPlatformCollision(p)){ hit = true; break; } }
+
+  if(!hit){
+    const groundY = worldHeight - 12 - ballSize;
+    if(ballY > groundY){
+      ballY = groundY;
+      vy = -vy * bounce;
+      isOnGround = true; onPlatform = null;
+      if(Math.abs(vy) < 0.5) vy = 0;
+    } else {
+      isOnGround = false;
+    }
+  }
+
+  // simple world bounds
+  if(ballX < 0){ ballX = 0; vx = -vx * bounce; }
+  if(ballX > worldWidth - ballSize){ ballX = worldWidth - ballSize; vx = -vx * bounce; }
+  if(ballY < 0){ ballY = 0; vy = -vy * bounce; }
+
+  update();
+  updateCamera();
+  requestAnimationFrame(loop);
+}
+
+/* Input handlers: pointer/touch & keyboard */
+/* Helper to set key and reflect visual state */
+function setKey(k,v){
+  keys[k]=v;
+  // visual pressed state (simple)
+  if(k==='left') leftBtn.style.background = v ? "linear-gradient(180deg, rgba(253,185,39,0.9), rgba(85,37,131,0.9))" : "";
+  if(k==='right') rightBtn.style.background = v ? "linear-gradient(180deg, rgba(253,185,39,0.9), rgba(85,37,131,0.9))" : "";
+}
+
+/* pointer events for visible buttons */
+leftBtn.addEventListener('pointerdown', e => { e.preventDefault(); setKey('left',true); });
+leftBtn.addEventListener('pointerup', e => { e.preventDefault(); setKey('left',false); });
+leftBtn.addEventListener('pointercancel', ()=>setKey('left',false));
+leftBtn.addEventListener('pointerleave', ()=>setKey('left',false));
+
+rightBtn.addEventListener('pointerdown', e => { e.preventDefault(); setKey('right',true); });
+rightBtn.addEventListener('pointerup', e => { e.preventDefault(); setKey('right',false); });
+rightBtn.addEventListener('pointercancel', ()=>setKey('right',false));
+rightBtn.addEventListener('pointerleave', ()=>setKey('right',false));
+
+/* invisible half-screen zones for convenience (hold to move) */
+leftZone.addEventListener('pointerdown', e => { e.preventDefault(); setKey('left',true); });
+leftZone.addEventListener('pointerup', e => { e.preventDefault(); setKey('left',false); });
+leftZone.addEventListener('pointercancel', ()=>setKey('left',false));
+leftZone.addEventListener('pointerleave', ()=>setKey('left',false));
+
+rightZone.addEventListener('pointerdown', e => { e.preventDefault(); setKey('right',true); });
+rightZone.addEventListener('pointerup', e => { e.preventDefault(); setKey('right',false); });
+rightZone.addEventListener('pointercancel', ()=>setKey('right',false));
+rightZone.addEventListener('pointerleave', ()=>setKey('right',false));
+
+/* jump button */
+jumpBtn.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if(isOnGround || onPlatform){ vy = -jumpForce; isOnGround=false; onPlatform=null; }
+});
+
+/* simple swipe detection to jump (optional): upward flick */
+let touchStartY = null, touchStartX = null;
+document.addEventListener('touchstart', e => {
+  const t = e.touches[0];
+  touchStartY = t.clientY; touchStartX = t.clientX;
+}, {passive:true});
+document.addEventListener('touchend', e => {
+  if(touchStartY===null) return;
+  const t = e.changedTouches[0];
+  const dy = touchStartY - t.clientY;
+  const dx = t.clientX - touchStartX;
+  // upward flick -> jump
+  if(dy > 60 && Math.abs(dx) < 120 && (isOnGround || onPlatform)) { vy = -jumpForce; isOnGround=false; onPlatform=null; }
+  touchStartY = null; touchStartX = null;
+}, {passive:true});
+
+/* keyboard */
+window.addEventListener('keydown', e => {
+  if(e.key === 'ArrowLeft') setKey('left',true);
+  if(e.key === 'ArrowRight') setKey('right',true);
+  if(e.key === 'ArrowUp' || e.code === 'Space'){ e.preventDefault(); if(isOnGround || onPlatform){ vy = -jumpForce; isOnGround=false; onPlatform=null; } }
+});
+window.addEventListener('keyup', e => {
+  if(e.key === 'ArrowLeft') setKey('left',false);
+  if(e.key === 'ArrowRight') setKey('right',false);
+});
+
+/* handle resize */
+window.addEventListener('resize', ()=>{ buildWorld(); init(); });
+
+/* start */
+init();
+</script>
 </body>
 </html>
