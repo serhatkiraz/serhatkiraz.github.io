@@ -184,7 +184,7 @@ const gammaValue = document.getElementById('gammaValue');
 
 let w = window.innerWidth, h = window.innerHeight;
 let worldWidth = w * WORLD_PAGES;
-let worldHeight = h;
+let worldHeight = h * 1.5; // DÜNYA YÜKSEKLİĞİNİ ARTIRDIK
 
 // DÜNYA KONUMU (top daima ekran ortasında, dünya hareket eder)
 let worldX = 0; // Dünyanın X pozisyonu
@@ -217,8 +217,9 @@ document.addEventListener('touchmove', e => { e.preventDefault(); }, {passive:fa
 function buildWorld(){
   w = window.innerWidth; h = window.innerHeight;
   worldWidth = Math.max(w * 2, w * WORLD_PAGES);
+  worldHeight = h * 1.5; // Dünya yüksekliği pencereden daha yüksek
   world.style.width = worldWidth + 'px';
-  world.style.height = h + 'px';
+  world.style.height = worldHeight + 'px';
   
   // Dünyayı merkeze yerleştir
   world.style.left = '50%';
@@ -230,12 +231,12 @@ function buildWorld(){
 
   // positions (relative to worldWidth)
   const pos = [
-    {x: worldWidth * 0.03, y: h * 0.78, text:'Hi!'},
-    {x: worldWidth * 0.12, y: h * 0.55, text:"I am Serhat"},
-    {x: worldWidth * 0.32, y: h * 0.75, text:'I am passionate about exploring new ideas'},
-    {x: worldWidth * 0.52, y: h * 0.68, text:'I enjoy coding solid and unique apps'},
-    {x: worldWidth * 0.72, y: h * 0.58, text:'This are my finished projects'},
-    {x: worldWidth * 0.90, y: h * 0.48, text:'Feel free to contact me'}
+    {x: worldWidth * 0.03, y: worldHeight * 0.78, text:'Hi!'},
+    {x: worldWidth * 0.12, y: worldHeight * 0.55, text:"I am Serhat"},
+    {x: worldWidth * 0.32, y: worldHeight * 0.75, text:'I am passionate about exploring new ideas'},
+    {x: worldWidth * 0.52, y: worldHeight * 0.68, text:'I enjoy coding solid and unique apps'},
+    {x: worldWidth * 0.72, y: worldHeight * 0.58, text:'This are my finished projects'},
+    {x: worldWidth * 0.90, y: worldHeight * 0.48, text:'Feel free to contact me'}
   ];
 
   pos.forEach((p,i) => {
@@ -262,7 +263,7 @@ function buildWorld(){
   const grd = document.getElementById('ground');
   grd.style.width = worldWidth + 'px';
   grd.style.left = '0px';
-  grd.style.top = (h - 12) + 'px';
+  grd.style.top = (worldHeight - 12) + 'px'; // Dünyanın altında
 }
 
 /* initialize ball on first platform */
@@ -276,7 +277,7 @@ function init(){
     ballWorldY = platforms[0].y - ballSize - 6;
   } else {
     ballWorldX = worldWidth/2; 
-    ballWorldY = h/2;
+    ballWorldY = worldHeight/2;
   }
   
   // Kamerayı topun başlangıç pozisyonuna odakla
@@ -429,7 +430,8 @@ function loop(){
   }
 
   if(!hit){
-    const groundY = h - 12 - ballSize;
+    // ZEMİN ÇARPIŞMASI - DÜNYA YÜKSEKLİĞİNİ KULLAN
+const groundY = worldHeight - 77 - ballSize;
     if(ballWorldY > groundY){
       ballWorldY = groundY;
       vy = -vy * bounce;
