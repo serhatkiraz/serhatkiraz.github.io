@@ -3,182 +3,263 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>Serhat Kiraz</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
+:root{
+  --bg:#010104;
+  --accent:#8b9eff;
+  --cell:min(10vmin,70px);
+}
+
 *{margin:0;padding:0;box-sizing:border-box}
 
 body{
-  background:#010104;
+  background:radial-gradient(circle at top,#1a1a40,#010104);
   font-family:Inter;
   color:#fff;
-  overflow:hidden; /* kritik */
+  overflow:hidden;
 }
 
-/* ===== BACKGROUND ===== */
-.bg{
-  position:fixed;
-  inset:0;
-  background:radial-gradient(circle at 20% 0%, #1a1a40, #010104);
-  z-index:-1;
-}
-
-/* ===== TOP BAR ===== */
-.navbar{
+/* HEADER */
+.header{
   position:fixed;
   top:0;
   width:100%;
-  height:70px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:0 2rem;
-  backdrop-filter:blur(10px);
-  background:rgba(0,0,0,0.3);
-  z-index:10;
-}
-
-.logo{
+  text-align:center;
+  padding:1rem;
   font-weight:800;
-  color:#8b9eff;
-}
-
-/* ===== GAME AREA ===== */
-.game{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  z-index:5;
+  background:rgba(0,0,0,0.4);
+  backdrop-filter:blur(10px);
 }
 
 /* BOARD */
 .board{
+  position:absolute;
+  top:60px;
+  left:50%;
+  transform:translateX(-50%);
   display:grid;
-  grid-template-columns:repeat(9, min(10vmin,70px));
-  grid-template-rows:repeat(9, min(10vmin,70px));
-  gap:2px;
+  grid-template-columns:repeat(9,var(--cell));
+  grid-template-rows:repeat(9,var(--cell));
 }
 
 .cell{
+  border:1px solid rgba(255,255,255,0.05);
   background:#111;
+  position:relative;
 }
 
-/* ===== HERO OVERLAY ===== */
-.hero{
-  position:absolute;
-  inset:0;
+.fill{
+  width:100%;
+  height:100%;
+  border-radius:6px;
+}
+
+/* PICKER (projeler) */
+.picker{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
   display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  background:rgba(0,0,0,0.7);
-  z-index:5;
+  gap:1rem;
 }
 
-.hero h1{
-  font-size:3rem;
-  margin-bottom:1rem;
+/* PROJECT BLOCK */
+.project{
+  display:grid;
+  gap:4px;
+  padding:6px;
+  cursor:grab;
 }
 
-.hero button{
-  padding:1rem 2rem;
-  border:none;
-  background:#8b9eff;
-  border-radius:30px;
-  cursor:pointer;
+.block{
+  width:var(--cell);
+  height:var(--cell);
+  border-radius:6px;
 }
 
-/* ===== SIDE PANEL (about/projects) ===== */
-.panel{
+/* LABEL */
+.label{
   position:absolute;
-  right:0;
-  top:70px;
-  width:300px;
-  height:calc(100% - 70px);
-  background:rgba(15,15,30,0.8);
-  backdrop-filter:blur(10px);
-  padding:1rem;
-  overflow:auto;
-  transform:translateX(100%);
-  transition:0.3s;
+  bottom:4px;
+  left:4px;
+  font-size:10px;
 }
 
-.panel.active{
-  transform:translateX(0);
+/* EXPLOSION */
+.fragment{
+  position:fixed;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  pointer-events:none;
+  animation:explode 0.6s forwards;
 }
 
-.panel h2{
-  margin-bottom:1rem;
-}
-
-/* ===== BUTTONS ===== */
-.ui-btn{
-  background:#1e1f3a;
-  border:none;
-  color:#fff;
-  padding:0.5rem 1rem;
-  border-radius:10px;
-  cursor:pointer;
+@keyframes explode{
+  to{
+    transform:translate(var(--x),var(--y)) scale(0);
+    opacity:0;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
+<div class="header">Serhat Kiraz — drag & play</div>
 
-<!-- NAV -->
-<div class="navbar">
-  <div class="logo">Serhat Kiraz</div>
-  <div>
-    <button class="ui-btn" onclick="togglePanel()">Projects</button>
-  </div>
-</div>
-
-<!-- GAME -->
-<div class="game">
-  <div id="board" class="board"></div>
-</div>
-
-<!-- HERO (homepage giriş) -->
-<div id="hero" class="hero">
-  <h1>Pixel Perfect<br>Game World</h1>
-  <button onclick="start()">OYNA</button>
-</div>
-
-<!-- SIDE PANEL -->
-<div id="panel" class="panel">
-  <h2>Projects</h2>
-  <p>• Miras App</p>
-  <p>• Puzzle Game</p>
-  <p>• UI Experiments</p>
-</div>
+<div id="board" class="board"></div>
+<div id="picker" class="picker"></div>
 
 <script>
-/* BOARD */
 const SIZE=9;
-const board=document.getElementById("board");
+let board=Array(SIZE).fill().map(()=>Array(SIZE).fill(0));
 
+const PROJECTS=[
+ {name:"Miras",shape:[[0,0],[1,0],[0,1]]},
+ {name:"Game",shape:[[0,0],[1,0],[2,0]]},
+ {name:"UI",shape:[[0,0],[0,1],[0,2]]},
+];
+
+const boardEl=document.getElementById("board");
+
+/* BOARD */
 for(let i=0;i<SIZE*SIZE;i++){
   const c=document.createElement("div");
   c.className="cell";
-  board.appendChild(c);
+  boardEl.appendChild(c);
 }
 
-/* HERO START */
-function start(){
-  document.getElementById("hero").style.display="none";
+/* CREATE PROJECT */
+function createProject(p){
+  const el=document.createElement("div");
+  el.className="project";
+  el.dataset.name=p.name;
+  el.shape=p.shape;
+
+  const color=`hsl(${Math.random()*360},70%,60%)`;
+
+  const w=Math.max(...p.shape.map(c=>c[0]))+1;
+  const h=Math.max(...p.shape.map(c=>c[1]))+1;
+
+  el.style.gridTemplateColumns=`repeat(${w},auto)`;
+
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const has=p.shape.some(c=>c[0]==x&&c[1]==y);
+      const b=document.createElement("div");
+      if(has){
+        b.className="block";
+        b.style.background=color;
+      }
+      el.appendChild(b);
+    }
+  }
+
+  el.onpointerdown=e=>startDrag(e,el,p.shape,color,p.name);
+
+  return el;
 }
 
-/* PANEL */
-function togglePanel(){
-  document.getElementById("panel").classList.toggle("active");
+/* PICKER */
+function fillPicker(){
+  const picker=document.getElementById("picker");
+  picker.innerHTML="";
+  PROJECTS.forEach(p=>picker.appendChild(createProject(p)));
 }
+
+/* DRAG */
+let drag=null;
+
+function startDrag(e,el,shape,color,name){
+  drag={shape,color,name};
+  document.onpointermove=move;
+  document.onpointerup=drop;
+}
+
+function move(e){}
+
+function drop(e){
+  const rect=boardEl.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/(rect.width/SIZE));
+  const y=Math.floor((e.clientY-rect.top)/(rect.height/SIZE));
+
+  place(drag.shape,y,x,drag.color,drag.name);
+
+  drag=null;
+  document.onpointermove=null;
+  document.onpointerup=null;
+}
+
+/* PLACE */
+function place(shape,row,col,color,name){
+  for(const [dx,dy] of shape){
+    const r=row+dy,c=col+dx;
+    if(r<0||c<0||r>=SIZE||c>=SIZE)return;
+  }
+
+  shape.forEach(([dx,dy])=>{
+    const r=row+dy,c=col+dx;
+    board[r][c]=1;
+    const cell=boardEl.children[r*SIZE+c];
+
+    const f=document.createElement("div");
+    f.className="fill";
+    f.style.background=color;
+
+    const label=document.createElement("div");
+    label.className="label";
+    label.innerText=name;
+
+    f.appendChild(label);
+    cell.appendChild(f);
+  });
+
+  checkLines();
+}
+
+/* LINE CLEAR */
+function checkLines(){
+  for(let r=0;r<SIZE;r++){
+    if(board[r].every(v=>v)){
+      explodeRow(r);
+    }
+  }
+}
+
+/* EXPLOSION */
+function explodeRow(r){
+  for(let c=0;c<SIZE;c++){
+    const cell=boardEl.children[r*SIZE+c];
+    const rect=cell.getBoundingClientRect();
+
+    for(let i=0;i<8;i++){
+      const frag=document.createElement("div");
+      frag.className="fragment";
+      frag.style.left=rect.left+"px";
+      frag.style.top=rect.top+"px";
+      frag.style.background=cell.firstChild?.style.background||"#fff";
+
+      frag.style.setProperty("--x",(Math.random()*100-50)+"px");
+      frag.style.setProperty("--y",(Math.random()*100-50)+"px");
+
+      document.body.appendChild(frag);
+      setTimeout(()=>frag.remove(),600);
+    }
+
+    cell.innerHTML="";
+    board[r][c]=0;
+  }
+}
+
+/* INIT */
+fillPicker();
 </script>
 
 </body>
