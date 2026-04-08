@@ -1,611 +1,232 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Pixel Perfect · Handwritten Code</title>
-  <!-- Google Fonts: modern sans + monospace for code soul -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <!-- Font Awesome 6 (free) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Karıcım OS</title>
 
-    body {
-      background-color: #010104;
-      background-image: radial-gradient(circle at 25% 0%, rgba(20, 30, 55, 0.4) 0%, #010104 80%);
-      font-family: 'Inter', sans-serif;
-      color: #eef2ff;
-      line-height: 1.5;
-      scroll-behavior: smooth;
-      overflow-x: hidden;
-    }
+<style>
+:root{
+  --bg:#05080f;
+  --accent:#3ad1b8;
+  --glass:rgba(255,255,255,0.05);
+  --blur:blur(10px);
+  --cell-size:min(10vmin,70px);
+}
 
-    /* pixel-perfect baseline */
-    h1, h2, h3, p, a, button {
-      letter-spacing: -0.01em;
-    }
+*{margin:0;padding:0;box-sizing:border-box}
 
-    /* custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0a0a14;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #3b3f6e;
-      border-radius: 8px;
-    }
+body{
+  background:radial-gradient(circle at center,#081018,#02040a);
+  font-family:system-ui;
+  color:#fff;
+  overflow:hidden;
+}
 
-    /* animated gradient / new age backdrop */
-    .blob-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    .blob {
-      position: absolute;
-      filter: blur(80px);
-      opacity: 0.35;
-      border-radius: 50%;
-      animation: floatBlob 20s infinite alternate ease-in-out;
-    }
-    .blob1 {
-      width: 50vw;
-      height: 50vw;
-      background: radial-gradient(circle, #6c5ce7, #2d2b55);
-      top: -20vh;
-      left: -20vw;
-    }
-    .blob2 {
-      width: 60vw;
-      height: 60vw;
-      background: radial-gradient(circle, #00b4d8, #023e8a);
-      bottom: -30vh;
-      right: -30vw;
-      animation-duration: 28s;
-    }
-    .blob3 {
-      width: 40vw;
-      height: 40vw;
-      background: radial-gradient(circle, #f72585, #b5179e);
-      top: 40vh;
-      left: 60vw;
-      animation-duration: 25s;
-      opacity: 0.2;
-    }
-    @keyframes floatBlob {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(8%, 10%) scale(1.1); }
-    }
+/* ====== FULLSCREEN LAYER ====== */
+.app{
+  width:100vw;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
 
-    /* container */
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 1.75rem;
-    }
+/* ====== HEADER (homepage hissi) ====== */
+.topbar{
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 1rem;
+  backdrop-filter:var(--blur);
+  background:var(--glass);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
 
-    /* header / nav */
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 2rem 0 1.5rem 0;
-      flex-wrap: wrap;
-      gap: 1rem;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .logo {
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 600;
-      font-size: 1.5rem;
-      background: linear-gradient(135deg, #FFFFFF, #a7c0ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: -0.02em;
-    }
-    .logo span {
-      background: none;
-      color: #8b9eff;
-      font-weight: 500;
-    }
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-    }
-    .nav-links a {
-      color: #cdd9ff;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: 0.2s ease;
-      border-bottom: 1px solid transparent;
-      padding-bottom: 4px;
-    }
-    .nav-links a:hover {
-      color: white;
-      border-bottom-color: #8b9eff;
-    }
+.logo{
+  font-weight:700;
+  color:var(--accent);
+}
 
-    /* buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      background: rgba(255,255,255,0.03);
-      backdrop-filter: blur(2px);
-      border: 1px solid rgba(139, 158, 255, 0.4);
-      padding: 0.8rem 1.8rem;
-      border-radius: 60px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #f0f3ff;
-      text-decoration: none;
-      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-      cursor: pointer;
-    }
-    .btn-primary {
-      background: linear-gradient(105deg, #2b2d5c, #1e1f3a);
-      border-color: #6c7ef0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .btn-primary:hover {
-      background: linear-gradient(105deg, #3d3f7a, #2a2b4e);
-      border-color: #9aaeff;
-      transform: translateY(-3px);
-      box-shadow: 0 12px 24px -10px rgba(108, 94, 231, 0.4);
-    }
-    .btn-outline:hover {
-      background: rgba(139, 158, 255, 0.1);
-      border-color: #9aaeff;
-      transform: translateY(-2px);
-    }
+.menu{
+  display:flex;
+  gap:1rem;
+  font-size:0.9rem;
+  opacity:0.7;
+}
 
-    /* hero */
-    .hero {
-      padding: 5rem 0 6rem 0;
-      text-align: center;
-    }
-    .badge {
-      display: inline-block;
-      background: rgba(139, 158, 255, 0.12);
-      backdrop-filter: blur(4px);
-      border-radius: 100px;
-      padding: 0.3rem 1rem;
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-      color: #bfceff;
-      margin-bottom: 1.8rem;
-      border: 0.5px solid rgba(139, 158, 255, 0.3);
-    }
-    .hero h1 {
-      font-size: clamp(2.8rem, 8vw, 5rem);
-      font-weight: 800;
-      line-height: 1.2;
-      background: linear-gradient(to right, #ffffff, #b7c5ff, #9aabff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      margin-bottom: 1.5rem;
-    }
-    .hero .highlight {
-      background: linear-gradient(120deg, #f0f3ff, #c084fc);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .hero-description {
-      max-width: 720px;
-      margin: 0 auto 2rem auto;
-      font-size: 1.2rem;
-      color: #cbd5ff;
-      font-weight: 400;
-    }
-    .hero-description strong {
-      font-weight: 700;
-      color: white;
-    }
-    .btn-group {
-      display: flex;
-      justify-content: center;
-      gap: 1.2rem;
-      flex-wrap: wrap;
-    }
+/* ====== GAME AREA ====== */
+.game-area{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
 
-    /* section shared */
-    section {
-      padding: 5rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-    }
-    .section-title {
-      font-size: 2.2rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      letter-spacing: -0.02em;
-    }
-    .section-sub {
-      color: #9aa7d4;
-      max-width: 600px;
-      margin-bottom: 3rem;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2.5rem;
-      align-items: center;
-    }
-    .about-text p {
-      font-size: 1.1rem;
-      margin-bottom: 1.4rem;
-      color: #dfe6ff;
-    }
-    .code-card {
-      background: rgba(12, 12, 24, 0.7);
-      backdrop-filter: blur(12px);
-      border-radius: 28px;
-      border: 1px solid rgba(100, 108, 255, 0.2);
-      padding: 1.5rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      box-shadow: 0 25px 35px -15px rgba(0,0,0,0.5);
-    }
-    .code-card pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      color: #b9e0ff;
-    }
-    .code-card .comment { color: #6c87a5; }
-    .code-card .keyword { color: #bb9af7; }
-    .code-card .string { color: #9ece6a; }
+/* BOARD */
+.board{
+  display:grid;
+  grid-template-columns:repeat(9,var(--cell-size));
+  grid-template-rows:repeat(9,var(--cell-size));
+  background:#0b1118;
+  padding:8px;
+  border-radius:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
 
-    /* services grid */
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2rem;
-      margin-top: 2rem;
-    }
-    .service-card {
-      background: rgba(20, 20, 35, 0.5);
-      backdrop-filter: blur(4px);
-      border-radius: 2rem;
-      padding: 1.8rem;
-      border: 1px solid rgba(139, 158, 255, 0.15);
-      transition: all 0.25s ease;
-    }
-    .service-card:hover {
-      transform: translateY(-8px);
-      border-color: rgba(139, 158, 255, 0.5);
-      background: rgba(30, 30, 55, 0.6);
-    }
-    .service-icon {
-      font-size: 2.2rem;
-      margin-bottom: 1.2rem;
-      color: #a7b9ff;
-    }
-    .service-card h3 {
-      font-size: 1.5rem;
-      margin-bottom: 0.75rem;
-      font-weight: 600;
-    }
-    .service-card p {
-      color: #b9c3e6;
-      font-size: 0.95rem;
-    }
+.cell{
+  background:#111;
+  border:1px solid rgba(255,255,255,0.05);
+}
 
-    /* projects */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-    .project-card {
-      background: rgba(12, 12, 24, 0.65);
-      backdrop-filter: blur(8px);
-      border-radius: 2rem;
-      padding: 1.6rem;
-      border: 1px solid rgba(255,255,255,0.06);
-      transition: 0.2s;
-    }
-    .project-card:hover {
-      border-color: #6c7ef0;
-      background: rgba(20, 20, 40, 0.8);
-    }
-    .project-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      background: #1a1c2e;
-      display: inline-block;
-      padding: 0.2rem 0.7rem;
-      border-radius: 30px;
-      margin-bottom: 1rem;
-      color: #a7b9ff;
-    }
-    .project-card h3 {
-      font-size: 1.6rem;
-      margin-bottom: 0.75rem;
-    }
-    .project-card p {
-      color: #c2cef0;
-      margin-bottom: 1.5rem;
-    }
-    .project-link {
-      color: #9aaeff;
-      text-decoration: none;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
+/* ====== BOTTOM UI ====== */
+.bottom{
+  height:140px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  backdrop-filter:var(--blur);
+  background:var(--glass);
+  border-top:1px solid rgba(255,255,255,0.05);
+}
 
-    /* contact */
-    .contact-card {
-      background: linear-gradient(135deg, rgba(25, 25, 45, 0.6), rgba(15, 15, 30, 0.7));
-      backdrop-filter: blur(12px);
-      border-radius: 2.5rem;
-      padding: 2.5rem;
-      text-align: center;
-      border: 1px solid rgba(100, 120, 255, 0.2);
-    }
-    .social-links {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-    .social-icon {
-      background: rgba(255,255,255,0.05);
-      width: 52px;
-      height: 52px;
-      border-radius: 60px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      color: #cdd9ff;
-      transition: 0.2s;
-      border: 0.5px solid rgba(255,255,255,0.1);
-    }
-    .social-icon:hover {
-      background: #6c7ef0;
-      color: white;
-      transform: scale(1.05);
-    }
+/* PICKER */
+.picker{
+  display:flex;
+  gap:1rem;
+}
 
-    /* footer */
-    .footer {
-      padding: 2.5rem 0 3rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: #7d89b0;
-    }
+.block{
+  width:var(--cell-size);
+  height:var(--cell-size);
+  border-radius:6px;
+  background:var(--accent);
+}
 
-    /* responsive */
-    @media (max-width: 760px) {
-      .container {
-        padding: 0 1.2rem;
-      }
-      .navbar {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .nav-links {
-        gap: 1.5rem;
-        flex-wrap: wrap;
-      }
-      .hero {
-        padding: 3rem 0 4rem;
-      }
-      .btn-group {
-        gap: 0.9rem;
-      }
-      .section-title {
-        font-size: 1.8rem;
-      }
-    }
-    @media (max-width: 480px) {
-      .service-card, .project-card {
-        padding: 1.4rem;
-      }
-    }
+/* SCORE */
+.score{
+  position:absolute;
+  top:80px;
+  right:20px;
+  background:var(--glass);
+  padding:10px 20px;
+  border-radius:10px;
+  backdrop-filter:var(--blur);
+}
 
-    /* custom cursor hint (pixel perfect micro interaction) */
-    a, button, .service-card, .project-card {
-      cursor: pointer;
-    }
-  </style>
+/* BUTTON */
+.btn{
+  margin-top:10px;
+  background:var(--accent);
+  color:#000;
+  padding:10px 20px;
+  border-radius:30px;
+  border:none;
+  cursor:pointer;
+}
+
+/* INTRO OVERLAY */
+.intro{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#000;
+  z-index:10;
+}
+
+.intro button{
+  font-size:1.2rem;
+  padding:1rem 2rem;
+  border-radius:40px;
+  border:none;
+  background:var(--accent);
+}
+</style>
 </head>
+
 <body>
 
-<div class="blob-bg">
-  <div class="blob blob1"></div>
-  <div class="blob blob2"></div>
-  <div class="blob blob3"></div>
+<div class="app">
+
+  <div class="topbar">
+    <div class="logo">Karıcım</div>
+    <div class="menu">
+      <div>Skor</div>
+      <div>Ayar</div>
+    </div>
+  </div>
+
+  <div class="game-area">
+    <div id="board" class="board"></div>
+
+    <div class="score">
+      ❤️ <span id="score">0</span>
+    </div>
+
+    <div id="intro" class="intro">
+      <button onclick="startGame()">OYNA</button>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="picker" id="picker"></div>
+    <button class="btn" onclick="rotate()">↻ Döndür</button>
+  </div>
+
 </div>
 
-<div class="container">
-  <nav class="navbar">
-    <div class="logo">
-      &lt;PXL<span>_PERFECT</span>/&gt;
-    </div>
-    <div class="nav-links">
-      <a href="#work">Work</a>
-      <a href="#craft">Craft</a>
-      <a href="#projects">Projects</a>
-      <a href="#connect">Connect</a>
-    </div>
-  </nav>
-
-  <header class="hero" id="home">
-    <div class="badge">
-      <i class="fas fa-code"></i> hand-written · pixel-perfect
-    </div>
-    <h1>
-      Obsessed with <span class="highlight">hand-written<br>code</span> & pixel-perfect design
-    </h1>
-    <div class="hero-description">
-      <strong>I’m a self-taught programmer</strong> obsessed with hand-written code and pixel-perfect designs for mobile and web applications. <br> I create <strong>unique, high-quality solutions.</strong>
-    </div>
-    <div class="btn-group">
-      <a href="#projects" class="btn btn-primary"><i class="fas fa-arrow-down"></i> Explore work</a>
-      <a href="#connect" class="btn btn-outline"><i class="fas fa-message"></i> Let’s create</a>
-    </div>
-  </header>
-
-  <!-- about + handwritten ethos -->
-  <section id="craft">
-    <div class="grid-2">
-      <div class="about-text">
-        <h2 class="section-title">Hand-written <br>digital alchemy</h2>
-        <p>Every single line is intentional. No bloated frameworks, no generated cruft — just pure, handcrafted code that breathes life into mobile & web experiences. Pixel-perfect means every margin, transition and micro-interaction tells a story.</p>
-        <p>From early prototypes to high-performance applications, I merge obsessive attention to detail with a new‑age creative mindset. Unique, future-proof, and unmistakably human.</p>
-        <div style="margin-top: 2rem;">
-          <span style="border-left: 3px solid #8b9eff; padding-left: 1rem; font-style: italic;">"Crafted by hand, polished to perfection."</span>
-        </div>
-      </div>
-      <div class="code-card">
-        <pre>
-<span class="comment">// hand-written with obsession</span>
-<span class="keyword">const</span> createSolution = (project) => {
-  <span class="keyword">return</span> {
-    quality: <span class="string">"premium"</span>,
-    pixelPerfect: <span class="keyword">true</span>,
-    mobileFirst: <span class="keyword">true</span>,
-    soul: <span class="string">"handwritten ✍️"</span>
-  };
-};
-
-<span class="comment">// unique, high-quality result</span>
-<span class="keyword">const</span> myWork = createSolution(<span class="string">"any vision"</span>);
-console.log(myWork); 
-<span class="comment">// → pixel perfect interface, smooth as silk</span>
-        </pre>
-      </div>
-    </div>
-  </section>
-
-  <!-- services / what I deliver -->
-  <section>
-    <div style="text-align: center;">
-      <h2 class="section-title">crafted with precision</h2>
-      <div class="section-sub">Every solution built from scratch, pixel by pixel.</div>
-    </div>
-    <div class="services-grid">
-      <div class="service-card">
-        <div class="service-icon"><i class="fas fa-pen-fancy"></i></div>
-        <h3>Hand-written code</h3>
-        <p>No AI-generated fluff — pure human logic, semantic markup, and custom architecture that performs and delights.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon"><i class="fas fa-mobile-alt"></i></div>
-        <h3>Pixel-perfect UI</h3>
-        <p>Responsive, retina-ready interfaces. Every icon, spacing, and animation aligns with the original vision.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon"><i class="fas fa-layer-group"></i></div>
-        <h3>Mobile · Web apps</h3>
-        <p>From PWA to React Native, I build cross-platform experiences that feel native and buttery smooth.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon"><i class="fas fa-gem"></i></div>
-        <h3>Unique solutions</h3>
-        <p>Creative, unconventional, and tailored. No templates — each project is a distinct digital fingerprint.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- featured projects -->
-  <section id="projects">
-    <div style="text-align: center;">
-      <h2 class="section-title">selected creations</h2>
-      <div class="section-sub">Unique, high-quality artifacts — each one handwritten.</div>
-    </div>
-    <div class="projects-grid">
-      <div class="project-card">
-        <div class="project-tag"><i class="fas fa-code"></i> / handcrafted</div>
-        <h3>✦ Nebula UI</h3>
-        <p>Component library built from scratch with zero dependencies. Pixel-perfect theming, dark mode, and accessibility-first.</p>
-        <a href="#" class="project-link">case study →</a>
-      </div>
-      <div class="project-card">
-        <div class="project-tag"><i class="fas fa-mobile-screen"></i> / mobile first</div>
-        <h3>✦ Flowstate</h3>
-        <p>Productivity suite for iOS & Android — gestures, haptics, and custom animations that feel like second nature.</p>
-        <a href="#" class="project-link">explore →</a>
-      </div>
-      <div class="project-card">
-        <div class="project-tag"><i class="fas fa-globe"></i> / immersive web</div>
-        <h3>✦ Aether Portfolio</h3>
-        <p>Interactive 3D web experience with WebGL, smooth transitions and a storytelling layout. Unique digital canvas.</p>
-        <a href="#" class="project-link">preview →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- contact & social -->
-  <section id="connect">
-    <div class="contact-card">
-      <h2 class="section-title" style="margin-bottom: 0.5rem;">craft the next big thing</h2>
-      <p style="max-width: 480px; margin: 0 auto 1rem auto; color: #b9c6f0;">Got a vision? Let's turn it into a pixel-perfect reality — hand-written, bold, and unique.</p>
-      <div style="margin: 2rem 0 1rem;">
-        <a href="mailto:hello@handwritten.dev" class="btn btn-primary" style="background: #2b2d5c;"><i class="fas fa-paper-plane"></i> hello@handwritten.dev</a>
-      </div>
-      <div class="social-links">
-        <a href="#" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
-        <a href="#" class="social-icon" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="social-icon" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-        <a href="#" class="social-icon" aria-label="Dribbble"><i class="fab fa-dribbble"></i></a>
-      </div>
-      <p style="margin-top: 1.8rem; font-size: 0.8rem;">⚡ Open for collaborations & creative coding adventures</p>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <p>© 2025 — hand-written code, pixel-perfect soul. <span style="font-family: monospace;">&lt;/obsessed&gt;</span></p>
-    <p style="margin-top: 0.5rem; font-size: 0.75rem;">Built from scratch • unique high-quality solutions</p>
-  </footer>
-</div>
-
-<!-- tiny script for smooth anchor + modern console touch -->
 <script>
-  (function() {
-    // smooth scroll for all anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        const targetId = this.getAttribute('href').substring(1);
-        if (targetId && targetId !== "") {
-          const targetElem = document.getElementById(targetId);
-          if (targetElem) {
-            e.preventDefault();
-            targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }
-      });
-    });
-    // dynamic year footer (optional)
-    const yearSpan = document.querySelector('.footer p:first-child');
-    if(yearSpan) {
-      const currentYear = new Date().getFullYear();
-      yearSpan.innerHTML = `© ${currentYear} — hand-written code, pixel-perfect soul. <span style="font-family: monospace;">&lt;/obsessed&gt;</span>`;
-    }
-    // little console signature
-    console.log("%c✨ Pixel perfect | Hand-written code obsession ✨", "color: #8b9eff; font-size: 16px; font-family: monospace;");
-    console.log("%cSelf-taught programmer — Unique high-quality solutions.", "color: #c9d4ff;");
-  })();
+const SIZE=9;
+let score=0;
+
+/* BOARD */
+const boardEl=document.getElementById("board");
+for(let i=0;i<SIZE*SIZE;i++){
+  const c=document.createElement("div");
+  c.className="cell";
+  boardEl.appendChild(c);
+}
+
+/* SIMPLE PIECES */
+function createPiece(){
+  const p=document.createElement("div");
+  p.className="block";
+  return p;
+}
+
+function fillPicker(){
+  const picker=document.getElementById("picker");
+  picker.innerHTML="";
+  for(let i=0;i<3;i++){
+    picker.appendChild(createPiece());
+  }
+}
+
+/* START */
+function startGame(){
+  document.getElementById("intro").style.display="none";
+  fillPicker();
+}
+
+/* ROTATE */
+function rotate(){
+  document.querySelectorAll(".block").forEach(b=>{
+    b.style.transform="rotate(90deg)";
+    setTimeout(()=>b.style.transform="rotate(0)",200);
+  });
+}
+
+/* SCORE TEST */
+setInterval(()=>{
+  score++;
+  document.getElementById("score").textContent=score;
+},2000);
+
 </script>
+
 </body>
 </html>
