@@ -1,289 +1,201 @@
-<!doctype html>
-<html lang="tr">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Serhat Kiraz</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
 <style>
-:root{
-  --bg:#05060a;
-  --accent:#8b9eff;
-}
-
-*{margin:0;padding:0;box-sizing:border-box}
-
+*{margin:0;padding:0;box-sizing:border-box;}
 body{
-  background:radial-gradient(circle at 20% 0%,#1a1a40,#05060a);
-  font-family:Inter;
-  color:#fff;
-  height:100vh;
+  background:#000;
+  color:#00ff88;
+  font-family:'Courier New',monospace;
   overflow:hidden;
 }
 
-/* ===== ATMOSPHERE ===== */
-.bg{
+/* atmosfer */
+body::before{
+  content:'';
   position:fixed;
-  inset:0;
+  width:100%;height:100%;
+  background:
+    radial-gradient(circle at 20% 50%,rgba(0,255,120,.15),transparent 60%),
+    radial-gradient(circle at 80% 20%,rgba(0,255,120,.08),transparent 60%);
   z-index:-1;
 }
 
-.blob{
-  position:absolute;
-  width:400px;
-  height:400px;
-  filter:blur(100px);
-  opacity:.4;
-  border-radius:50%;
-  animation:float 20s infinite alternate;
-}
-
-.b1{background:#6c5ce7; top:-100px; left:-100px;}
-.b2{background:#00b4d8; bottom:-100px; right:-100px;}
-
-@keyframes float{
-  to{transform:translate(80px,60px)}
-}
-
-/* ===== DEVICE FRAME ===== */
-.device{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-}
-
-/* PHONE */
-.phone{
-  width:320px;
-  height:640px;
-  border-radius:40px;
-  background:#000;
-  padding:12px;
-  box-shadow:0 40px 100px rgba(0,0,0,0.7);
-}
-
-.screen{
-  width:100%;
-  height:100%;
-  border-radius:30px;
-  overflow:hidden;
-  background:#0b0f1a;
-  position:relative;
-}
-
-/* PC */
-.pc{
-  width:800px;
-  height:500px;
-  border-radius:20px;
-  background:#111;
-  padding:10px;
-}
-
-/* HEADER */
-.header{
-  position:absolute;
-  top:0;
-  width:100%;
-  text-align:center;
-  padding:10px;
-  font-size:14px;
-  opacity:.7;
-}
-
-/* BOARD */
-.board{
-  position:absolute;
-  top:40px;
-  left:50%;
-  transform:translateX(-50%);
-  display:grid;
-  grid-template-columns:repeat(9,28px);
-  grid-template-rows:repeat(9,28px);
-}
-
-.cell{
-  border:1px solid rgba(255,255,255,0.05);
-}
-
-/* PICKER */
-.picker{
-  position:absolute;
-  bottom:10px;
-  width:100%;
+/* ana alan */
+.main{
+  height:100vh;
   display:flex;
+  flex-direction:column;
+  align-items:center;
   justify-content:center;
-  gap:10px;
 }
 
-/* PROJECT BLOCK */
-.project{
+/* başlık */
+h1{
+  font-size:clamp(2.5rem,8vw,4rem);
+  text-shadow:0 0 15px #00ff88;
+  margin-bottom:10px;
+}
+.device{
+  opacity:.6;
+  margin-bottom:30px;
+}
+
+/* grid (tetris alanı) */
+.grid{
   display:grid;
-  gap:3px;
-  cursor:grab;
+  grid-template-columns:repeat(4,80px);
+  grid-auto-rows:80px;
+  gap:10px;
+  background:rgba(0,255,120,.05);
+  padding:15px;
+  border:1px solid rgba(0,255,120,.2);
 }
 
+/* bloklar */
 .block{
-  width:28px;
-  height:28px;
-  border-radius:4px;
+  width:80px;height:80px;
+  background:rgba(0,255,120,.1);
+  border:1px solid #00ff88;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:grab;
+  user-select:none;
+  transition:.2s;
+}
+.block:hover{
+  background:rgba(0,255,120,.2);
+  transform:scale(1.05);
+}
+.block.dragging{
+  opacity:.5;
 }
 
-/* LABEL */
-.label{
+/* patlama efekti */
+.explode{
+  animation:explode .4s forwards;
+}
+@keyframes explode{
+  0%{transform:scale(1);opacity:1;}
+  100%{transform:scale(2);opacity:0;}
+}
+
+.footer{
   position:absolute;
-  font-size:9px;
-  bottom:2px;
-  left:2px;
+  bottom:20px;
+  opacity:.5;
+  font-size:.8rem;
 }
 </style>
 </head>
 
 <body>
 
-<div class="bg">
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
+<div class="main">
+  <h1>Serhat Kiraz</h1>
+  <div class="device" id="device"></div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="footer">drag · combine · explore</div>
 </div>
 
-<div id="device" class="device"></div>
-
 <script>
-/* ===== DEVICE DETECT ===== */
-function getDevice(){
-  const ua=navigator.userAgent.toLowerCase();
-  if(/android/.test(ua)) return "android";
-  if(/iphone|ipad/.test(ua)) return "ios";
-  return "pc";
+
+/* cihaz algılama */
+function detectDevice(){
+  const ua = navigator.userAgent.toLowerCase();
+  if(/iphone|ipad|ipod/.test(ua)) return "iOS";
+  if(/android/.test(ua)) return "Android";
+  return "Desktop";
 }
+document.getElementById("device").textContent = detectDevice();
 
-const deviceType=getDevice();
-const root=document.getElementById("device");
+/* projeler */
+const projects = [
+  {name:"Miras", link:"https://github.com/"},
+  {name:"App 2", link:"https://github.com/"},
+  {name:"App 3", link:"https://github.com/"},
+  {name:"App 4", link:"https://github.com/"},
+  {name:"App 5", link:"https://github.com/"},
+];
 
-/* ===== CREATE FRAME ===== */
-let container;
+const grid = document.getElementById("grid");
 
-if(deviceType==="pc"){
-  container=document.createElement("div");
-  container.className="pc";
-}else{
-  container=document.createElement("div");
-  container.className="phone";
-}
+/* blok oluştur */
+projects.forEach(p=>{
+  const el = document.createElement("div");
+  el.className="block";
+  el.textContent=p.name;
+  el.draggable=true;
+  el.dataset.link=p.link;
 
-const screen=document.createElement("div");
-screen.className="screen";
+  el.addEventListener("click",()=>{
+    window.open(p.link,"_blank");
+  });
 
-container.appendChild(screen);
-root.appendChild(container);
+  addDrag(el);
+  grid.appendChild(el);
+});
 
-/* HEADER */
-const header=document.createElement("div");
-header.className="header";
-header.innerText="Serhat Kiraz";
-screen.appendChild(header);
+/* drag sistemi */
+let dragEl=null;
 
-/* BOARD */
-const SIZE=9;
-const board=document.createElement("div");
-board.className="board";
+function addDrag(el){
+  el.addEventListener("dragstart",()=>{
+    dragEl=el;
+    el.classList.add("dragging");
+  });
 
-let grid=[];
-for(let i=0;i<SIZE*SIZE;i++){
-  const c=document.createElement("div");
-  c.className="cell";
-  board.appendChild(c);
-}
-screen.appendChild(board);
-
-/* PICKER */
-const picker=document.createElement("div");
-picker.className="picker";
-screen.appendChild(picker);
-
-/* ===== GITHUB PROJECTS ===== */
-async function loadProjects(){
-  const res=await fetch("https://api.github.com/users/USERNAME/repos");
-  const data=await res.json();
-
-  const selected=data.slice(0,5);
-
-  selected.forEach(repo=>{
-    picker.appendChild(createProject(repo));
+  el.addEventListener("dragend",()=>{
+    el.classList.remove("dragging");
+    checkLines();
   });
 }
 
-/* PROJECT BLOCK */
-function createProject(repo){
-  const el=document.createElement("div");
-  el.className="project";
+grid.addEventListener("dragover",(e)=>{
+  e.preventDefault();
+  const after = getAfterElement(e.clientX,e.clientY);
+  if(after==null){
+    grid.appendChild(dragEl);
+  }else{
+    grid.insertBefore(dragEl,after);
+  }
+});
 
-  const shape=[[0,0],[1,0],[0,1]]; // basit
-
-  const color=`hsl(${Math.random()*360},70%,60%)`;
-
-  el.style.gridTemplateColumns="repeat(2,auto)";
-
-  shape.forEach(()=>{
-    const b=document.createElement("div");
-    b.className="block";
-    b.style.background=color;
-    el.appendChild(b);
-  });
-
-  el.onpointerdown=e=>{
-    drag={repo,shape,color};
-    document.onpointerup=drop;
-  };
-
-  return el;
-}
-
-/* DRAG DROP */
-let drag=null;
-
-function drop(e){
-  if(!drag)return;
-
-  const rect=board.getBoundingClientRect();
-  const col=Math.floor((e.clientX-rect.left)/28);
-  const row=Math.floor((e.clientY-rect.top)/28);
-
-  place(drag,row,col);
-
-  drag=null;
-  document.onpointerup=null;
-}
-
-/* PLACE */
-function place(d,row,col){
-  d.shape.forEach(([dx,dy])=>{
-    const r=row+dy,c=col+dx;
-    if(r<0||c<0||r>=SIZE||c>=SIZE)return;
-
-    const cell=board.children[r*SIZE+c];
-
-    const f=document.createElement("div");
-    f.className="block";
-    f.style.background=d.color;
-
-    const label=document.createElement("div");
-    label.className="label";
-    label.innerText=d.repo.name;
-
-    f.appendChild(label);
-
-    f.onclick=()=>window.open(d.repo.html_url);
-
-    cell.appendChild(f);
+/* pozisyon bul */
+function getAfterElement(x,y){
+  const els=[...grid.querySelectorAll(".block:not(.dragging)")];
+  return els.find(el=>{
+    const box=el.getBoundingClientRect();
+    return x<box.right && y<box.bottom;
   });
 }
 
-/* INIT */
-loadProjects();
+/* satır kontrol + patlama */
+function checkLines(){
+  const rows = [...grid.children];
+
+  for(let i=0;i<rows.length;i+=4){
+    const slice = rows.slice(i,i+4);
+    if(slice.length===4){
+      // basit kontrol: hepsi doluysa patlat
+      slice.forEach(el=>{
+        el.classList.add("explode");
+      });
+
+      setTimeout(()=>{
+        slice.forEach(el=>el.remove());
+      },400);
+    }
+  }
+}
+
 </script>
 
 </body>
