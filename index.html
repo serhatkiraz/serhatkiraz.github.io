@@ -3,200 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Serhat Kiraz</title>
-
+<title>LUCA | Serhat Kiraz</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{
-  background:#000;
-  color:#00ff88;
-  font-family:'Courier New',monospace;
-  overflow:hidden;
-}
-
-/* atmosfer */
-body::before{
-  content:'';
-  position:fixed;
-  width:100%;height:100%;
-  background:
-    radial-gradient(circle at 20% 50%,rgba(0,255,120,.15),transparent 60%),
-    radial-gradient(circle at 80% 20%,rgba(0,255,120,.08),transparent 60%);
-  z-index:-1;
-}
-
-/* ana alan */
-.main{
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-
-/* başlık */
-h1{
-  font-size:clamp(2.5rem,8vw,4rem);
-  text-shadow:0 0 15px #00ff88;
-  margin-bottom:10px;
-}
-.device{
-  opacity:.6;
-  margin-bottom:30px;
-}
-
-/* grid (tetris alanı) */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,80px);
-  grid-auto-rows:80px;
-  gap:10px;
-  background:rgba(0,255,120,.05);
-  padding:15px;
-  border:1px solid rgba(0,255,120,.2);
-}
-
-/* bloklar */
-.block{
-  width:80px;height:80px;
-  background:rgba(0,255,120,.1);
-  border:1px solid #00ff88;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:grab;
-  user-select:none;
-  transition:.2s;
-}
-.block:hover{
-  background:rgba(0,255,120,.2);
-  transform:scale(1.05);
-}
-.block.dragging{
-  opacity:.5;
-}
-
-/* patlama efekti */
-.explode{
-  animation:explode .4s forwards;
-}
-@keyframes explode{
-  0%{transform:scale(1);opacity:1;}
-  100%{transform:scale(2);opacity:0;}
-}
-
-.footer{
-  position:absolute;
-  bottom:20px;
-  opacity:.5;
-  font-size:.8rem;
-}
+body{background:#000;color:#00ff88;font-family:'Courier New',monospace;min-height:100vh;overflow:hidden;position:relative;}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 50%,rgba(0,40,20,0.3) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(0,60,30,0.2) 0%,transparent 50%),radial-gradient(circle at 40% 80%,rgba(0,80,40,0.2) 0%,transparent 50%);pointer-events:none;z-index:-1;}
+.main-menu{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100vh;padding:20px;position:relative;}
+.pulse{animation:pulse 3s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.7;}}
+h1{font-size:clamp(2.5rem,8vw,4.5rem);margin-bottom:.5rem;text-shadow:0 0 10px #00ff88,0 0 20px #00ff88;letter-spacing:3px;}
+.subtitle{font-size:clamp(.9rem,3vw,1.2rem);margin-bottom:2rem;color:#88ffaa;max-width:600px;line-height:1.5;}
+.worlds-container{display:flex;justify-content:center;gap:clamp(20px,5vw,60px);margin:3rem 0;flex-wrap:wrap;}
+.world-option{cursor:pointer;transition:all .3s ease;display:flex;flex-direction:column;align-items:center;}
+.world-option:hover{transform:translateY(-10px);}
+.world-option.selected{transform:scale(1.05);}
+.world-circle{width:clamp(120px,25vw,200px);height:clamp(120px,25vw,200px);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;position:relative;overflow:hidden;box-shadow:0 0 30px rgba(0,255,136,0.2);border:3px solid transparent;transition:all .3s ease;}
+.world-option.selected .world-circle{border-color:#00ff88;box-shadow:0 0 40px rgba(0,255,136,0.5);}
+.world-circle.lifeless{background:radial-gradient(circle at 30% 30%,#1a5c3a,#0a2a1a);}
+.world-circle.corrupted{background:radial-gradient(circle at 30% 30%,#5c1a3a,#2a0a1a);position:relative;}
+.world-circle.corrupted.locked::after{content:'🔒';position:absolute;font-size:2rem;color:rgba(255,255,255,.7);text-shadow:0 0 10px #ff0066;z-index:2;}
+.world-circle.corrupted.locked{filter:grayscale(.7) brightness(.5);cursor:not-allowed;}
+.world-circle.corrupted.locked:hover{transform:none;}
+.world-circle.corrupted::before{content:'';position:absolute;width:100%;height:100%;background:radial-gradient(circle at 70% 20%,rgba(255,0,102,.3),transparent 50%),radial-gradient(circle at 30% 70%,rgba(153,0,76,.3),transparent 50%);animation:corrupt-pulse 4s ease-in-out infinite alternate;}
+@keyframes corrupt-pulse{0%{opacity:.3;}100%{opacity:.7;}}
+.world-icon{font-size:clamp(3rem,8vw,5rem);filter:drop-shadow(0 0 10px currentColor);}
+.world-name{font-size:clamp(1rem,2.5vw,1.3rem);margin-bottom:.5rem;font-weight:bold;letter-spacing:1px;}
+.world-desc{font-size:clamp(.8rem,2vw,1rem);color:#88ffaa;max-width:200px;line-height:1.4;}
+.warning-message{color:#ff9966;font-size:clamp(.9rem,2.5vw,1.1rem);margin:1rem 0 2rem;max-width:500px;padding:10px 20px;background:rgba(255,153,102,.1);border-radius:8px;border:1px solid #ff9966;display:none;animation:fadeIn .5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+.start-button{background:transparent;border:2px solid #00ff88;color:#00ff88;font-size:clamp(1.2rem,4vw,1.8rem);padding:1rem 2.5rem;border-radius:50px;cursor:pointer;transition:all .3s ease;font-family:'Courier New',monospace;font-weight:bold;letter-spacing:2px;text-decoration:none;display:none;margin-top:2rem;box-shadow:0 0 15px rgba(0,255,136,.3);}
+.start-button:hover,.start-button:focus{background:rgba(0,255,136,.1);box-shadow:0 0 25px rgba(0,255,136,.5);transform:scale(1.05);}
+.start-button:active{transform:scale(.98);}
+.start-button.visible{display:inline-block;animation:pulse 2s ease-in-out infinite;}
+.projects-container{display:flex;justify-content:center;gap:1rem;margin-top:3rem;flex-wrap:wrap;}
+.project-option{cursor:pointer;padding:10px 20px;border:2px solid #00ff88;border-radius:10px;transition:all .3s ease;color:#00ff88;}
+.project-option:hover{background:rgba(0,255,136,.1);}
+.project-display{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#000;border:2px solid #00ff88;padding:20px;border-radius:15px;display:none;min-width:300px;max-width:90%;text-align:center;color:#00ff88;}
+.footer{position:fixed;bottom:20px;color:#008844;font-size:.8rem;}
 </style>
 </head>
-
 <body>
+<div class="main-menu" id="main-menu">
+    <h1 class="pulse">LUCA</h1>
+    <div class="subtitle">LAST UNIVERSAL COMMON ANCESTOR</div>
 
-<div class="main">
-  <h1>Serhat Kiraz</h1>
-  <div class="device" id="device"></div>
+    <div class="worlds-container">
+        <div class="world-option" id="lifeless-world" data-world="lifeless">
+            <div class="world-circle lifeless"><div class="world-icon">🟣</div></div>
+            <div class="world-name">LIFELESS WORLD</div>
+            <div class="world-desc">Standard path.</div>
+        </div>
+        <div class="world-option" id="corrupted-world" data-world="corrupted">
+            <div class="world-circle corrupted locked"><div class="world-icon">🟡</div></div>
+            <div class="world-name">CORRUPTED WORLD</div>
+            <div class="world-desc">Alternate paths...</div>
+        </div>
+    </div>
 
-  <div class="grid" id="grid"></div>
+    <div class="warning-message" id="warning-message">Corrupt the Lifeless World first</div>
+    <button class="start-button pulse" id="start-button">⚡</button>
 
-  <div class="footer">drag · combine · explore</div>
+    <div class="projects-container" id="projects-container"></div>
+    <div class="project-display" id="project-display"></div>
+
+    <div class="footer">© 2025 Serhat Kiraz</div>
 </div>
 
 <script>
-
-/* cihaz algılama */
-function detectDevice(){
-  const ua = navigator.userAgent.toLowerCase();
-  if(/iphone|ipad|ipod/.test(ua)) return "iOS";
-  if(/android/.test(ua)) return "Android";
-  return "Desktop";
-}
-document.getElementById("device").textContent = detectDevice();
-
-/* projeler */
-const projects = [
-  {name:"Miras", link:"https://github.com/"},
-  {name:"App 2", link:"https://github.com/"},
-  {name:"App 3", link:"https://github.com/"},
-  {name:"App 4", link:"https://github.com/"},
-  {name:"App 5", link:"https://github.com/"},
+// Örnek projeler
+const allProjects = [
+    { name: "Project A", content: "Content of Project A" },
+    { name: "Project B", content: "Content of Project B" },
+    { name: "Project C", content: "Content of Project C" },
+    { name: "Project D", content: "Content of Project D" },
+    { name: "Project E", content: "Content of Project E" }
 ];
 
-const grid = document.getElementById("grid");
-
-/* blok oluştur */
-projects.forEach(p=>{
-  const el = document.createElement("div");
-  el.className="block";
-  el.textContent=p.name;
-  el.draggable=true;
-  el.dataset.link=p.link;
-
-  el.addEventListener("click",()=>{
-    window.open(p.link,"_blank");
-  });
-
-  addDrag(el);
-  grid.appendChild(el);
-});
-
-/* drag sistemi */
-let dragEl=null;
-
-function addDrag(el){
-  el.addEventListener("dragstart",()=>{
-    dragEl=el;
-    el.classList.add("dragging");
-  });
-
-  el.addEventListener("dragend",()=>{
-    el.classList.remove("dragging");
-    checkLines();
-  });
+// Rastgele 3 proje seç
+function getRandomProjects(arr, n=3) {
+    const shuffled = arr.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, n);
 }
 
-grid.addEventListener("dragover",(e)=>{
-  e.preventDefault();
-  const after = getAfterElement(e.clientX,e.clientY);
-  if(after==null){
-    grid.appendChild(dragEl);
-  }else{
-    grid.insertBefore(dragEl,after);
-  }
+const projectsContainer = document.getElementById("projects-container");
+const projectDisplay = document.getElementById("project-display");
+const randomProjects = getRandomProjects(allProjects);
+
+randomProjects.forEach(proj => {
+    const div = document.createElement("div");
+    div.className = "project-option";
+    div.textContent = proj.name;
+    div.addEventListener("click", () => {
+        projectDisplay.textContent = proj.content;
+        projectDisplay.style.display = "block";
+    });
+    projectsContainer.appendChild(div);
 });
 
-/* pozisyon bul */
-function getAfterElement(x,y){
-  const els=[...grid.querySelectorAll(".block:not(.dragging)")];
-  return els.find(el=>{
-    const box=el.getBoundingClientRect();
-    return x<box.right && y<box.bottom;
-  });
-}
+// Kapatmak için tıklayınca kaybolsun
+projectDisplay.addEventListener("click", () => {
+    projectDisplay.style.display = "none";
+});
 
-/* satır kontrol + patlama */
-function checkLines(){
-  const rows = [...grid.children];
+// World selection logic (basitleştirilmiş)
+let selectedWorld = null;
+const lifelessWorld = document.getElementById('lifeless-world');
+const corruptedWorld = document.getElementById('corrupted-world');
+const warningMessage = document.getElementById('warning-message');
+const startButton = document.getElementById('start-button');
+const corruptedCircle = corruptedWorld.querySelector('.world-circle');
 
-  for(let i=0;i<rows.length;i+=4){
-    const slice = rows.slice(i,i+4);
-    if(slice.length===4){
-      // basit kontrol: hepsi doluysa patlat
-      slice.forEach(el=>{
-        el.classList.add("explode");
-      });
-
-      setTimeout(()=>{
-        slice.forEach(el=>el.remove());
-      },400);
+lifelessWorld.addEventListener('click', () => {
+    lifelessWorld.classList.add('selected');
+    corruptedWorld.classList.remove('selected');
+    selectedWorld = 'lifeless';
+    startButton.classList.add('visible');
+});
+corruptedWorld.addEventListener('click', () => {
+    if (corruptedCircle.classList.contains('locked')) {
+        warningMessage.style.display = 'block';
+        setTimeout(()=>warningMessage.style.display='none',2000);
+        return;
     }
-  }
-}
-
+    corruptedWorld.classList.add('selected');
+    lifelessWorld.classList.remove('selected');
+    selectedWorld = 'corrupted';
+    startButton.classList.add('visible');
+});
 </script>
-
 </body>
 </html>
