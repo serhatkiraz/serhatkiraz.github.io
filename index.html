@@ -9,257 +9,281 @@
 
 <style>
 :root{
-  --bg:#010104;
+  --bg:#05060a;
   --accent:#8b9eff;
-  --cell:min(10vmin,70px);
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
 
 body{
-  background:radial-gradient(circle at top,#1a1a40,#010104);
+  background:radial-gradient(circle at 20% 0%,#1a1a40,#05060a);
   font-family:Inter;
   color:#fff;
+  height:100vh;
   overflow:hidden;
+}
+
+/* ===== ATMOSPHERE ===== */
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+}
+
+.blob{
+  position:absolute;
+  width:400px;
+  height:400px;
+  filter:blur(100px);
+  opacity:.4;
+  border-radius:50%;
+  animation:float 20s infinite alternate;
+}
+
+.b1{background:#6c5ce7; top:-100px; left:-100px;}
+.b2{background:#00b4d8; bottom:-100px; right:-100px;}
+
+@keyframes float{
+  to{transform:translate(80px,60px)}
+}
+
+/* ===== DEVICE FRAME ===== */
+.device{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+
+/* PHONE */
+.phone{
+  width:320px;
+  height:640px;
+  border-radius:40px;
+  background:#000;
+  padding:12px;
+  box-shadow:0 40px 100px rgba(0,0,0,0.7);
+}
+
+.screen{
+  width:100%;
+  height:100%;
+  border-radius:30px;
+  overflow:hidden;
+  background:#0b0f1a;
+  position:relative;
+}
+
+/* PC */
+.pc{
+  width:800px;
+  height:500px;
+  border-radius:20px;
+  background:#111;
+  padding:10px;
 }
 
 /* HEADER */
 .header{
-  position:fixed;
+  position:absolute;
   top:0;
   width:100%;
   text-align:center;
-  padding:1rem;
-  font-weight:800;
-  z-index:5;
-  background:rgba(0,0,0,0.4);
-  backdrop-filter:blur(10px);
+  padding:10px;
+  font-size:14px;
+  opacity:.7;
 }
 
 /* BOARD */
 .board{
   position:absolute;
-  top:60px;
+  top:40px;
   left:50%;
   transform:translateX(-50%);
   display:grid;
-  grid-template-columns:repeat(9,var(--cell));
-  grid-template-rows:repeat(9,var(--cell));
+  grid-template-columns:repeat(9,28px);
+  grid-template-rows:repeat(9,28px);
 }
 
 .cell{
   border:1px solid rgba(255,255,255,0.05);
-  background:#111;
-  position:relative;
 }
 
-.fill{
-  width:100%;
-  height:100%;
-  border-radius:6px;
-}
-
-/* PICKER (projeler) */
+/* PICKER */
 .picker{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
+  position:absolute;
+  bottom:10px;
+  width:100%;
   display:flex;
-  gap:1rem;
+  justify-content:center;
+  gap:10px;
 }
 
 /* PROJECT BLOCK */
 .project{
   display:grid;
-  gap:4px;
-  padding:6px;
+  gap:3px;
   cursor:grab;
 }
 
 .block{
-  width:var(--cell);
-  height:var(--cell);
-  border-radius:6px;
+  width:28px;
+  height:28px;
+  border-radius:4px;
 }
 
 /* LABEL */
 .label{
   position:absolute;
-  bottom:4px;
-  left:4px;
-  font-size:10px;
-}
-
-/* EXPLOSION */
-.fragment{
-  position:fixed;
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  pointer-events:none;
-  animation:explode 0.6s forwards;
-}
-
-@keyframes explode{
-  to{
-    transform:translate(var(--x),var(--y)) scale(0);
-    opacity:0;
-  }
+  font-size:9px;
+  bottom:2px;
+  left:2px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">Serhat Kiraz — drag & play</div>
+<div class="bg">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+</div>
 
-<div id="board" class="board"></div>
-<div id="picker" class="picker"></div>
+<div id="device" class="device"></div>
 
 <script>
-const SIZE=9;
-let board=Array(SIZE).fill().map(()=>Array(SIZE).fill(0));
+/* ===== DEVICE DETECT ===== */
+function getDevice(){
+  const ua=navigator.userAgent.toLowerCase();
+  if(/android/.test(ua)) return "android";
+  if(/iphone|ipad/.test(ua)) return "ios";
+  return "pc";
+}
 
-const PROJECTS=[
- {name:"Miras",shape:[[0,0],[1,0],[0,1]]},
- {name:"Game",shape:[[0,0],[1,0],[2,0]]},
- {name:"UI",shape:[[0,0],[0,1],[0,2]]},
-];
+const deviceType=getDevice();
+const root=document.getElementById("device");
 
-const boardEl=document.getElementById("board");
+/* ===== CREATE FRAME ===== */
+let container;
+
+if(deviceType==="pc"){
+  container=document.createElement("div");
+  container.className="pc";
+}else{
+  container=document.createElement("div");
+  container.className="phone";
+}
+
+const screen=document.createElement("div");
+screen.className="screen";
+
+container.appendChild(screen);
+root.appendChild(container);
+
+/* HEADER */
+const header=document.createElement("div");
+header.className="header";
+header.innerText="Serhat Kiraz";
+screen.appendChild(header);
 
 /* BOARD */
+const SIZE=9;
+const board=document.createElement("div");
+board.className="board";
+
+let grid=[];
 for(let i=0;i<SIZE*SIZE;i++){
   const c=document.createElement("div");
   c.className="cell";
-  boardEl.appendChild(c);
+  board.appendChild(c);
+}
+screen.appendChild(board);
+
+/* PICKER */
+const picker=document.createElement("div");
+picker.className="picker";
+screen.appendChild(picker);
+
+/* ===== GITHUB PROJECTS ===== */
+async function loadProjects(){
+  const res=await fetch("https://api.github.com/users/USERNAME/repos");
+  const data=await res.json();
+
+  const selected=data.slice(0,5);
+
+  selected.forEach(repo=>{
+    picker.appendChild(createProject(repo));
+  });
 }
 
-/* CREATE PROJECT */
-function createProject(p){
+/* PROJECT BLOCK */
+function createProject(repo){
   const el=document.createElement("div");
   el.className="project";
-  el.dataset.name=p.name;
-  el.shape=p.shape;
+
+  const shape=[[0,0],[1,0],[0,1]]; // basit
 
   const color=`hsl(${Math.random()*360},70%,60%)`;
 
-  const w=Math.max(...p.shape.map(c=>c[0]))+1;
-  const h=Math.max(...p.shape.map(c=>c[1]))+1;
+  el.style.gridTemplateColumns="repeat(2,auto)";
 
-  el.style.gridTemplateColumns=`repeat(${w},auto)`;
+  shape.forEach(()=>{
+    const b=document.createElement("div");
+    b.className="block";
+    b.style.background=color;
+    el.appendChild(b);
+  });
 
-  for(let y=0;y<h;y++){
-    for(let x=0;x<w;x++){
-      const has=p.shape.some(c=>c[0]==x&&c[1]==y);
-      const b=document.createElement("div");
-      if(has){
-        b.className="block";
-        b.style.background=color;
-      }
-      el.appendChild(b);
-    }
-  }
-
-  el.onpointerdown=e=>startDrag(e,el,p.shape,color,p.name);
+  el.onpointerdown=e=>{
+    drag={repo,shape,color};
+    document.onpointerup=drop;
+  };
 
   return el;
 }
 
-/* PICKER */
-function fillPicker(){
-  const picker=document.getElementById("picker");
-  picker.innerHTML="";
-  PROJECTS.forEach(p=>picker.appendChild(createProject(p)));
-}
-
-/* DRAG */
+/* DRAG DROP */
 let drag=null;
 
-function startDrag(e,el,shape,color,name){
-  drag={shape,color,name};
-  document.onpointermove=move;
-  document.onpointerup=drop;
-}
-
-function move(e){}
-
 function drop(e){
-  const rect=boardEl.getBoundingClientRect();
-  const x=Math.floor((e.clientX-rect.left)/(rect.width/SIZE));
-  const y=Math.floor((e.clientY-rect.top)/(rect.height/SIZE));
+  if(!drag)return;
 
-  place(drag.shape,y,x,drag.color,drag.name);
+  const rect=board.getBoundingClientRect();
+  const col=Math.floor((e.clientX-rect.left)/28);
+  const row=Math.floor((e.clientY-rect.top)/28);
+
+  place(drag,row,col);
 
   drag=null;
-  document.onpointermove=null;
   document.onpointerup=null;
 }
 
 /* PLACE */
-function place(shape,row,col,color,name){
-  for(const [dx,dy] of shape){
+function place(d,row,col){
+  d.shape.forEach(([dx,dy])=>{
     const r=row+dy,c=col+dx;
     if(r<0||c<0||r>=SIZE||c>=SIZE)return;
-  }
 
-  shape.forEach(([dx,dy])=>{
-    const r=row+dy,c=col+dx;
-    board[r][c]=1;
-    const cell=boardEl.children[r*SIZE+c];
+    const cell=board.children[r*SIZE+c];
 
     const f=document.createElement("div");
-    f.className="fill";
-    f.style.background=color;
+    f.className="block";
+    f.style.background=d.color;
 
     const label=document.createElement("div");
     label.className="label";
-    label.innerText=name;
+    label.innerText=d.repo.name;
 
     f.appendChild(label);
+
+    f.onclick=()=>window.open(d.repo.html_url);
+
     cell.appendChild(f);
   });
-
-  checkLines();
-}
-
-/* LINE CLEAR */
-function checkLines(){
-  for(let r=0;r<SIZE;r++){
-    if(board[r].every(v=>v)){
-      explodeRow(r);
-    }
-  }
-}
-
-/* EXPLOSION */
-function explodeRow(r){
-  for(let c=0;c<SIZE;c++){
-    const cell=boardEl.children[r*SIZE+c];
-    const rect=cell.getBoundingClientRect();
-
-    for(let i=0;i<8;i++){
-      const frag=document.createElement("div");
-      frag.className="fragment";
-      frag.style.left=rect.left+"px";
-      frag.style.top=rect.top+"px";
-      frag.style.background=cell.firstChild?.style.background||"#fff";
-
-      frag.style.setProperty("--x",(Math.random()*100-50)+"px");
-      frag.style.setProperty("--y",(Math.random()*100-50)+"px");
-
-      document.body.appendChild(frag);
-      setTimeout(()=>frag.remove(),600);
-    }
-
-    cell.innerHTML="";
-    board[r][c]=0;
-  }
 }
 
 /* INIT */
-fillPicker();
+loadProjects();
 </script>
 
 </body>
